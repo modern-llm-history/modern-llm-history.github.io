@@ -1,1 +1,229 @@
-UNDER-CONSTRUCTION
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GPT以後のLLMの歴史</title>
+    <meta name="description" content="GPT以後の大規模言語モデルの進化をたどる、現代LLM史の展示ページ。" />
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="static/style.css" />
+  </head>
+  <body>
+    <main class="main-grid">
+      <!-- ===== Header ===== -->
+      <header class="site-header" style="grid-area: header">
+        <h1>GPT以後のLLMの歴史</h1>
+        <p class="site-dek">
+          自己教師型の大規模なベースモデルを前提にしたLLMの歴史は、まだ10年にも満たないごく新しいものです。
+          2018年の初代GPT登場から現在までの流れを、いくつかの転換点に分けて振り返ります。
+        </p>
+        <p class="site-wip">🚧 仮設ページ — コンテンツは順次追加されます</p>
+      </header>
+
+      <!-- ===== TOC (left sidebar) ===== -->
+      <aside class="toc-shell" style="grid-area: toc" aria-label="目次">
+        <nav class="section-nav">
+          <div class="toc-sticky">
+            <svg id="toc-svg" class="toc-svg" aria-hidden="true"></svg>
+          </div>
+        </nav>
+      </aside>
+
+      <!-- ===== Main content ===== -->
+      <article class="main-content" id="main-content" style="grid-area: content">
+
+        <section class="intro-block">
+          <p>
+            ここで扱うのは、とくに「自己教師あり事前学習された大規模ベースモデル」がどのように生まれ、
+            どんな進化を辿ってきたのかという大まかな物語です。
+          </p>
+          <details class="tab-box">
+            <summary>このページについて</summary>
+            <div class="tab-panel">
+              <p>
+                この分野はあまりに流れが速く、「体系的なLLM史」のようなものがきちんと整理されていることは多くありません。
+                このオンラインブースでは、そんな短くも濃いLLMの歴史を、いくつかの転換点に分けてざっくり振り返っていきます。
+              </p>
+            </div>
+          </details>
+        </section>
+
+        <!-- Scene 1 -->
+        <section id="scene-1" class="history-section" data-scene="scene-1" data-chart-domain="2018.0,2019.0" data-toc-label="2018">
+          <time>2018-01 – 2018-12</time>
+          <h2>GPT-1 と「事前学習する言語モデル」の年</h2>
+          <p>
+            2018年は、いわゆる「GPT以前／以後」の境目になった年です。
+            OpenAIが "Improving Language Understanding by Generative Pre-Training" というTech Reportを公開し、
+            のちにGPT-1と呼ばれる最初のモデルが登場します。
+          </p>
+          <p>
+            モデル自体は、BooksCorpusを使って事前学習された12層のデコーダ型Transformerで、
+            やっていることは「左から右に次のトークンを予測する」だけの素朴な言語モデルですが、
+            これをそのまま多様なタスク向けにファインチューニングしてみると、
+            個別タスク向けに作り込まれたモデルをしのぐ性能を発揮しました。
+          </p>
+          <p>
+            同じ2018年の後半には、GoogleからBERTが登場します。
+            こうして2018年は、「巨大な自己教師あり事前学習」が
+            一部の研究トピックから、NLP全体の前提条件へと変わっていく転換点になりました。
+          </p>
+        </section>
+
+        <!-- Scene 2 -->
+        <section id="scene-2" class="history-section" data-scene="scene-2" data-chart-domain="2018.0,2020.8" data-toc-label="2019–2020">
+          <time>2019-02 – 2020-06</time>
+          <h2>GPT-2 / GPT-3 と「スケーリングがほんとっぽい」時期</h2>
+          <p>
+            2019年2月、OpenAIはGPT-2を発表します。
+            パラメータ数1.5Bのデコーダ型Transformerで、モデルサイズを増やしていくと、
+            言語モデリングのlossや各種ベンチマークの性能がきれいなべき乗則に沿って改善していくことが示されました。
+          </p>
+          <p>
+            2020年夏、GPT-3 175Bが登場します。
+            プロンプトの先頭に数例の例示を並べるだけで、
+            翻訳・要約・質問応答・常識推論などを「その場で」こなす few-shot / zero-shot 能力が広く知られるようになりました。
+          </p>
+          <p>
+            「タスクごとの専用アーキテクチャをいじる前に、
+            まずはモデルとデータとcomputeを素直にスケールさせるだけでだいぶ強くなる」
+            という手応えが広く共有された時期です。
+          </p>
+        </section>
+
+        <!-- Scene 3 -->
+        <section id="scene-3" class="history-section" data-scene="scene-3" data-chart-domain="2018.0,2023.0" data-toc-label="2020–2022">
+          <time>2020-06 – 2022-10</time>
+          <h2>汎用ベンチマークと API 化</h2>
+          <p>
+            「何でもそこそこ解ける」汎用モデルが API として提供されるようになり、
+            産業界での活用が始まります。
+            主に曖昧な自然言語の分類器としての価値や、チャットボット、インタラクティブなゲームなど、
+            間違いが許されるエンタメ領域での利用が広がりました。
+          </p>
+          <p>
+            2022年にはChinchilla論文により「モデルとデータを同じ比率でスケールさせるとcompute最適になる」
+            という明確な指針が示されます。
+            Gopherや初期のPaLMなど、大規模モデルの系譜はこの方向を精緻化していきます。
+          </p>
+        </section>
+
+        <!-- Scene 4 -->
+        <section id="scene-4" class="history-section" data-scene="scene-4" data-chart-domain="2018.0,2024.8" data-toc-label="2022–2024">
+          <time>2022-11 – 2024-08</time>
+          <h2>ChatGPTとGPT-4と言語モデル戦国時代</h2>
+          <p>
+            ChatGPTというあまりにも大きな起爆剤が登場し、LLMの存在が一般社会に広く知れ渡ります。
+            そしてGPT-4の衝撃。
+            2024年にはClaude 3 Opus、Gemini 1.5 Pro、GPT-4oなど、各社のモデルが次々とリリースされ、
+            言語モデル戦国時代と呼ぶにふさわしい競争が始まりました。
+          </p>
+          <p>
+            オープンソース側でもLLaMAから始まったローカルLLMブーム、
+            Mistral、Gemmaの台頭と、モデルの民主化が進みます。
+            GitHub CopilotやClineなど、コーディング支援ツールも登場し始めます。
+          </p>
+        </section>
+
+        <!-- Scene 5 -->
+        <section id="scene-5" class="history-section" data-scene="scene-5" data-chart-domain="2018.0,2025.8" data-toc-label="2024–2025">
+          <time>2024-09 – 2025-08</time>
+          <h2>Reasoner: What Ilya saw</h2>
+          <p>
+            ついにReasonerが到来します。
+            事前学習のスケーリングに続く第二のスケーリング — Test-Time Scaling。
+            o1, o3、そしてClaude 3.5 Sonnet の改良版がこの潮流を牽引しました。
+          </p>
+          <p>
+            2025年に入り、モデルリリースのペースはさらに加速。
+            Claude 4, Gemini 2.5, GPT-5とメジャーリリースが続き、
+            IMO金メダル相当の数学問題解決やハルシネーション率の大幅低減など、
+            質的な飛躍も見られました。
+          </p>
+        </section>
+
+        <!-- Scene 6 -->
+        <section id="scene-6" class="history-section" data-scene="scene-6" data-chart-domain="2018.0,2026.3" data-toc-label="2025–2026">
+          <time>2025-09 – 2026-03</time>
+          <h2>加速し続けるLLM</h2>
+          <p>
+            2025年はエージェント元年でした。
+            LLMファーストのコーディング、研究分野での活用、
+            人間の手を介さないオフィスワークが現実味を帯び始めます。
+          </p>
+          <p>
+            GPT-5.1, Claude Opus 4.5, Gemini 3.0 Proなどがリリースされ、
+            モデルリリース間隔はますます縮み始めます。
+            LLMがLLM自体の技術を加速する瀬戸際 — それが2026年の今です。
+          </p>
+        </section>
+
+      </article>
+
+      <!-- ===== Chart (right sidebar) ===== -->
+      <aside class="graph-shell" style="grid-area: graph" aria-label="LLMタイムラインのサイド情報">
+        <div class="sticky-chart-container" id="sticky-briefing">
+          <div class="date-chip" aria-live="polite" aria-atomic="true">
+            <div class="month-slot" aria-hidden="true">
+              <span id="date-month-current" class="month-text">Jan</span>
+              <span id="date-month-next" class="month-text month-text-next"></span>
+            </div>
+            <div class="sr-only" id="date-announcer">Jan 2018</div>
+            <div class="year-slot" id="date-year-slot" aria-label="2018"></div>
+          </div>
+
+          <div class="panel-anim" id="panel-anim">
+            <div class="chart-stage">
+              <svg
+                id="history-chart"
+                viewBox="0 0 430 152"
+                preserveAspectRatio="xMidYMid meet"
+                role="img"
+                aria-labelledby="chart-title-svg chart-desc-svg"
+              >
+                <title id="chart-title-svg">各時代のLLM動向を表すスクロール同期グラフ</title>
+                <desc id="chart-desc-svg">スクロール位置に応じて期間ごとのトレンドだけが順番に表示される SVG グラフ。</desc>
+              </svg>
+            </div>
+
+            <div class="panel-meta-row">
+              <div class="capability-grid" id="capability-grid"></div>
+              <div class="focus-ring-wrap">
+                <p class="micro-label" id="focus-label">Center of Gravity</p>
+                <svg id="focus-ring" class="focus-ring" viewBox="0 0 120 120" role="img" aria-label="時代ごとの重心"></svg>
+              </div>
+            </div>
+
+            <section class="copies-panel">
+              <p class="copies-copy">
+                <span id="copy-count">2</span>
+                <span id="copy-caption">flagship paradigms reshape NLP</span>
+              </p>
+              <div class="copy-grid" id="copy-grid" aria-hidden="true"></div>
+            </section>
+
+            <section class="stats-inline" id="stats-inline" aria-label="時代ごとの要約統計"></section>
+
+            <section class="tech-strip">
+              <div class="tech-strip-head" aria-hidden="true">
+                <span>Current</span>
+                <span>Emerging</span>
+                <span>Next</span>
+              </div>
+              <div class="tech-strip-groups" id="tech-strip-groups"></div>
+            </section>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <script src="static/chart.js" defer></script>
+    <script src="static/toc.js" defer></script>
+  </body>
+</html>
