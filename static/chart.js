@@ -1,5 +1,5 @@
 /* ==========================================================================
-   chart.js — AI 2027 style sticky visual for LLM history
+   chart.js — Sticky compute chart for LLM history
    ========================================================================== */
 (function () {
   "use strict";
@@ -20,10 +20,6 @@
     while (node.firstChild) {
       node.removeChild(node.firstChild);
     }
-  }
-
-  function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
   }
 
   function linePath(points) {
@@ -49,48 +45,16 @@
     return d;
   }
 
-  function polarToCartesian(cx, cy, r, angleDegrees) {
-    var angleRadians = (angleDegrees - 90) * Math.PI / 180;
-    return {
-      x: cx + (r * Math.cos(angleRadians)),
-      y: cy + (r * Math.sin(angleRadians))
-    };
-  }
-
-  function donutArcPath(cx, cy, outerRadius, innerRadius, startAngle, endAngle) {
-    var startOuter = polarToCartesian(cx, cy, outerRadius, endAngle);
-    var endOuter = polarToCartesian(cx, cy, outerRadius, startAngle);
-    var startInner = polarToCartesian(cx, cy, innerRadius, startAngle);
-    var endInner = polarToCartesian(cx, cy, innerRadius, endAngle);
-    var largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-
-    return [
-      "M", startOuter.x, startOuter.y,
-      "A", outerRadius, outerRadius, 0, largeArcFlag, 0, endOuter.x, endOuter.y,
-      "L", startInner.x, startInner.y,
-      "A", innerRadius, innerRadius, 0, largeArcFlag, 1, endInner.x, endInner.y,
-      "Z"
-    ].join(" ");
-  }
-
   var sticky = document.getElementById("sticky-briefing");
   var panelAnim = document.getElementById("panel-anim");
   var svg = document.getElementById("history-chart");
   var capabilityGrid = document.getElementById("capability-grid");
-  var focusRing = document.getElementById("focus-ring");
-  var focusLabel = document.getElementById("focus-label");
-  var copyCount = document.getElementById("copy-count");
-  var copyCaption = document.getElementById("copy-caption");
-  var copyGrid = document.getElementById("copy-grid");
-  var statsInline = document.getElementById("stats-inline");
-  var techStripGroups = document.getElementById("tech-strip-groups");
   var monthCurrent = document.getElementById("date-month-current");
   var monthNext = document.getElementById("date-month-next");
   var yearSlot = document.getElementById("date-year-slot");
   var dateAnnouncer = document.getElementById("date-announcer");
 
-  if (!sticky || !panelAnim || !svg || !capabilityGrid || !focusRing || !focusLabel || !copyCount ||
-      !copyCaption || !copyGrid || !statsInline || !techStripGroups || !monthCurrent ||
+  if (!sticky || !panelAnim || !svg || !capabilityGrid || !monthCurrent ||
       !monthNext || !yearSlot || !dateAnnouncer) {
     return;
   }
@@ -101,198 +65,95 @@
       year: "2018",
       chart: {
         startLabel: "2018",
-        endLabel: "2019",
-        caption: "Pretraining shift",
+        endLabel: "2020",
         series: [
-          { label: "Compute", color: "#2b6a4a", width: 2.5, values: [18, 20, 24, 28, 34, 41] },
-          { label: "Capability", color: "#55574f", width: 2.2, values: [14, 16, 19, 23, 29, 34] },
-          { label: "Reach", color: "#8e836e", width: 2.2, values: [4, 5, 6, 8, 10, 12] }
+          { color: "#2b6a4a", width: 2.5, values: [18, 20, 24, 28, 34, 41] }
         ]
       },
-      capabilities: [
-        { label: "Pretrain", level: "active" },
-        { label: "Scaling", level: "mid" },
-        { label: "API", level: "off" },
-        { label: "Chat", level: "off" },
-        { label: "Reason", level: "off" },
-        { label: "Agents", level: "off" }
-      ],
-      ring: { center: "Research", values: [0.72, 0.18, 0.10] },
-      copies: { count: "2", caption: "paradigms make pretraining unavoidable", fill: 6 },
-      stats: [
-        { label: "Compute", value: "10^19" },
-        { label: "UI", value: "papers" },
-        { label: "Loop", value: "finetune" },
-        { label: "Labs", value: "2" },
-        { label: "Open", value: "low" },
-        { label: "Reach", value: "research" }
-      ],
-      tech: [7, 2, 1]
+      benchmarks: [
+        { lane: "Pretrain", label: "LAMBADA 72.5%", level: "active", detail: "Long-context word prediction benchmark. Early signal that autoregressive pretraining transferred broadly.", replacement: "MMLU" },
+        { lane: "Scaling", label: "Commonsense 63.8%", level: "mid", detail: "Placeholder umbrella for early commonsense benchmarks used to see scaling effects.", replacement: "PIQA" },
+        { lane: "API", label: "SSA 39/100", level: "off", detail: "Placeholder single-turn response quality eval before API productization solidified.", replacement: "SSI" },
+        { lane: "Chat", label: "Humanness 2.6/5", level: "off", detail: "Early human-likeness judging before chat-native public rankings existed.", replacement: "Arena" },
+        { lane: "Reason", label: "PIQA 68.3%", level: "off", detail: "Physical commonsense QA used as a proxy before dedicated reasoning evals took over.", replacement: "GSM8K" },
+        { lane: "Agents", label: "Tool-use 12%", level: "off", detail: "Placeholder proto-agent tool-use tasks. Agents were not yet a stable category.", replacement: "SWE-bench" }
+      ]
     },
     "scene-2": {
-      month: "Feb",
-      year: "2019",
-      chart: {
-        startLabel: "2019",
-        endLabel: "2020",
-        caption: "Scaling laws",
-        series: [
-          { label: "Compute", color: "#2b6a4a", width: 2.5, values: [25, 29, 38, 50, 63, 74] },
-          { label: "Capability", color: "#55574f", width: 2.2, values: [22, 25, 33, 42, 55, 68] },
-          { label: "Reach", color: "#8e836e", width: 2.2, values: [8, 10, 12, 16, 20, 24] }
-        ]
-      },
-      capabilities: [
-        { label: "Pretrain", level: "active" },
-        { label: "Scaling", level: "active" },
-        { label: "API", level: "mid" },
-        { label: "Chat", level: "off" },
-        { label: "Reason", level: "off" },
-        { label: "Agents", level: "off" }
-      ],
-      ring: { center: "Scale", values: [0.66, 0.18, 0.16] },
-      copies: { count: "3", caption: "frontier runs test power-law growth", fill: 10 },
-      stats: [
-        { label: "Compute", value: "10^23" },
-        { label: "UI", value: "demos" },
-        { label: "Loop", value: "scale up" },
-        { label: "Labs", value: "3" },
-        { label: "Open", value: "low" },
-        { label: "Reach", value: "labs→apps" }
-      ],
-      tech: [6, 4, 2]
-    },
-    "scene-3": {
       month: "Jun",
       year: "2020",
       chart: {
         startLabel: "2020",
         endLabel: "2022",
-        caption: "API layer",
         series: [
-          { label: "Compute", color: "#2b6a4a", width: 2.5, values: [36, 41, 48, 56, 60, 66] },
-          { label: "Capability", color: "#55574f", width: 2.2, values: [34, 39, 45, 53, 59, 65] },
-          { label: "Reach", color: "#8e836e", width: 2.2, values: [18, 24, 32, 41, 48, 55] }
+          { color: "#2b6a4a", width: 2.5, values: [36, 41, 48, 56, 60, 66] }
         ]
       },
-      capabilities: [
-        { label: "Pretrain", level: "active" },
-        { label: "Scaling", level: "active" },
-        { label: "API", level: "active" },
-        { label: "Chat", level: "mid" },
-        { label: "Reason", level: "off" },
-        { label: "Agents", level: "off" }
-      ],
-      ring: { center: "API", values: [0.45, 0.35, 0.20] },
-      copies: { count: "12", caption: "teams ship frontier models through APIs", fill: 18 },
-      stats: [
-        { label: "Compute", value: "10^24" },
-        { label: "UI", value: "completions" },
-        { label: "Loop", value: "serve" },
-        { label: "Labs", value: "5" },
-        { label: "Open", value: "low" },
-        { label: "Reach", value: "enterprise" }
-      ],
-      tech: [7, 5, 3]
+      benchmarks: [
+        { lane: "Pretrain", label: "LAMBADA 86.4%", level: "active", detail: "By this point LAMBADA was nearing saturation and pushing people toward broader knowledge evals.", replacement: "MMLU" },
+        { lane: "Scaling", label: "PIQA 82.3%", level: "active", detail: "A cleaner physical commonsense benchmark for the scaling era.", replacement: "HellaSwag / GPQA" },
+        { lane: "API", label: "SSI 67/100", level: "active", detail: "Placeholder API-era instruction-following and stability eval.", replacement: "MT-Bench" },
+        { lane: "Chat", label: "Engaging 3.7/5", level: "mid", detail: "Human-judged engagingness before chat UI became the public face of LLMs.", replacement: "Arena" },
+        { lane: "Reason", label: "Grounded 71%", level: "off", detail: "Groundedness/safety style evals that mattered for early deployment.", replacement: "GSM8K / GPQA" },
+        { lane: "Agents", label: "Sandbox 23%", level: "off", detail: "Placeholder sandbox tool-usage score for pre-agent product experiments.", replacement: "WebArena / SWE-bench" }
+      ]
     },
-    "scene-4": {
+    "scene-3": {
       month: "Nov",
       year: "2022",
       chart: {
         startLabel: "2022",
         endLabel: "2024",
-        caption: "Chat interface",
         series: [
-          { label: "Compute", color: "#2b6a4a", width: 2.5, values: [48, 52, 58, 66, 74, 78] },
-          { label: "Capability", color: "#55574f", width: 2.2, values: [44, 49, 58, 70, 81, 88] },
-          { label: "Reach", color: "#8e836e", width: 2.2, values: [34, 42, 58, 74, 89, 96] }
+          { color: "#2b6a4a", width: 2.5, values: [48, 52, 58, 66, 74, 78] }
         ]
       },
-      capabilities: [
-        { label: "Pretrain", level: "mid" },
-        { label: "Scaling", level: "active" },
-        { label: "API", level: "active" },
-        { label: "Chat", level: "active" },
-        { label: "Reason", level: "mid" },
-        { label: "Agents", level: "off" }
-      ],
-      ring: { center: "Chat", values: [0.26, 0.48, 0.26] },
-      copies: { count: "100M+", caption: "people meet chat-native LLMs", fill: 30 },
-      stats: [
-        { label: "Compute", value: "10^25" },
-        { label: "UI", value: "chat" },
-        { label: "Loop", value: "deploy" },
-        { label: "Labs", value: "7" },
-        { label: "Open", value: "rising" },
-        { label: "Reach", value: "mass" }
-      ],
-      tech: [8, 6, 4]
+      benchmarks: [
+        { lane: "Pretrain", label: "MMLU 86.4%", level: "mid", detail: "Broad knowledge exam that became the public shorthand for frontier capability.", replacement: "MMLU-Pro" },
+        { lane: "Scaling", label: "HellaSwag 95.3%", level: "active", detail: "A high-scoring commonsense benchmark showing how older evals were saturating.", replacement: "GPQA" },
+        { lane: "API", label: "MT-Bench 8.6", level: "active", detail: "Multi-turn assistant eval used heavily in the post-ChatGPT comparison loop.", replacement: "ToolBench" },
+        { lane: "Chat", label: "Arena 1248", level: "active", detail: "Chatbot Arena Elo. Public-facing ranking that made model competition legible.", replacement: "Arena-Hard" },
+        { lane: "Reason", label: "GSM8K 92.0%", level: "mid", detail: "Math word problems. Standard reasoning yardstick before harder math/science evals took over.", replacement: "AIME 2024" },
+        { lane: "Agents", label: "SWE-lite 18.4%", level: "off", detail: "Early software-task eval showing the move from abstract answers to real task completion.", replacement: "SWE-Verified" }
+      ]
     },
-    "scene-5": {
+    "scene-4": {
       month: "Sep",
       year: "2024",
       chart: {
         startLabel: "2024",
         endLabel: "2025",
-        caption: "Reasoning wave",
         series: [
-          { label: "Compute", color: "#2b6a4a", width: 2.5, values: [68, 72, 79, 84, 88, 93] },
-          { label: "Capability", color: "#55574f", width: 2.2, values: [72, 75, 81, 87, 92, 96] },
-          { label: "Reach", color: "#8e836e", width: 2.2, values: [64, 68, 72, 79, 84, 88] }
+          { color: "#2b6a4a", width: 2.5, values: [68, 72, 79, 84, 88, 93] }
         ]
       },
-      capabilities: [
-        { label: "Pretrain", level: "mid" },
-        { label: "Scaling", level: "active" },
-        { label: "API", level: "active" },
-        { label: "Chat", level: "active" },
-        { label: "Reason", level: "active" },
-        { label: "Agents", level: "mid" }
-      ],
-      ring: { center: "Reason", values: [0.22, 0.24, 0.54] },
-      copies: { count: "6", caption: "reasoner families define the frontier", fill: 38 },
-      stats: [
-        { label: "Compute", value: "10^25+" },
-        { label: "UI", value: "reason" },
-        { label: "Loop", value: "infer" },
-        { label: "Labs", value: "8" },
-        { label: "Open", value: "mixed" },
-        { label: "Reach", value: "pro work" }
-      ],
-      tech: [8, 7, 6]
+      benchmarks: [
+        { lane: "Pretrain", label: "MMLU-Pro 78%", level: "mid", detail: "Harder successor to MMLU once the original version became too easy.", replacement: "HLE-like" },
+        { lane: "Scaling", label: "GPQA 65%", level: "active", detail: "Hard science QA used to separate frontier models after many older evals saturated.", replacement: "FrontierOps" },
+        { lane: "API", label: "ToolBench 74%", level: "active", detail: "Tool-use oriented assistant eval reflecting the shift from pure chat to action.", replacement: "Agentic Tool Use" },
+        { lane: "Chat", label: "Arena-Hard 89%", level: "active", detail: "Harder variant of Arena-style comparison prompts.", replacement: "SessionBench" },
+        { lane: "Reason", label: "AIME 83%", level: "active", detail: "Competition math became the clearest public signal of reasoner performance.", replacement: "HLE-like" },
+        { lane: "Agents", label: "SWE-Verified 49%", level: "mid", detail: "Verified software-task evaluation for agentic coding performance.", replacement: "RE-Bench" }
+      ]
     },
-    "scene-6": {
-      month: "Mar",
+    "scene-5": {
+      month: "Jan",
       year: "2026",
       chart: {
-        startLabel: "2025",
-        endLabel: "2026",
-        caption: "Agent loop",
+        startLabel: "2026",
+        endLabel: "future",
         series: [
-          { label: "Compute", color: "#2b6a4a", width: 2.5, values: [78, 84, 88, 92, 95, 98] },
-          { label: "Capability", color: "#55574f", width: 2.2, values: [82, 86, 90, 94, 97, 99] },
-          { label: "Reach", color: "#8e836e", width: 2.2, values: [72, 78, 83, 88, 93, 97] }
+          { color: "#2b6a4a", width: 2.5, values: [78, 84, 88, 92, 95, 98] }
         ]
       },
-      capabilities: [
-        { label: "Pretrain", level: "mid" },
-        { label: "Scaling", level: "active" },
-        { label: "API", level: "active" },
-        { label: "Chat", level: "mid" },
-        { label: "Reason", level: "active" },
-        { label: "Agents", level: "active" }
-      ],
-      ring: { center: "Agents", values: [0.18, 0.22, 0.60] },
-      copies: { count: "24/7", caption: "autonomous workflows keep the loop running", fill: 48 },
-      stats: [
-        { label: "Compute", value: "clusters" },
-        { label: "UI", value: "agents" },
-        { label: "Loop", value: "AI-on-AI" },
-        { label: "Labs", value: "9+" },
-        { label: "Open", value: "contested" },
-        { label: "Reach", value: "core work" }
-      ],
-      tech: [9, 8, 8]
+      benchmarks: [
+        { lane: "Pretrain", label: "WorldSense 84%", level: "mid", detail: "Placeholder future benchmark for broad multimodal world understanding.", replacement: "ongoing" },
+        { lane: "Scaling", label: "FrontierOps 91%", level: "active", detail: "Placeholder harder frontier benchmark family for post-2026 scaling.", replacement: "ongoing" },
+        { lane: "API", label: "Agentic Tool 88%", level: "active", detail: "Placeholder future tool-use eval focused on long-running assistant behavior.", replacement: "ongoing" },
+        { lane: "Chat", label: "SessionBench 4.7/5", level: "mid", detail: "Placeholder future long-session chat evaluation.", replacement: "ongoing" },
+        { lane: "Reason", label: "HLE-like 26%", level: "active", detail: "Placeholder extremely hard reasoning benchmark where low scores can still matter.", replacement: "ongoing" },
+        { lane: "Agents", label: "RE-Bench 62%", level: "active", detail: "Placeholder real-environment agent benchmark.", replacement: "ongoing" }
+      ]
     }
   };
 
@@ -378,7 +239,7 @@
     }, 340);
   }
 
-  function renderCapabilities(items) {
+  function renderBenchmarks(items) {
     clearNode(capabilityGrid);
 
     items.forEach(function (item) {
@@ -386,6 +247,10 @@
       chip.className = "capability-chip";
       if (item.level === "active") chip.classList.add("is-active");
       if (item.level === "mid") chip.classList.add("is-mid");
+
+      chip.title = item.lane + ": " + item.label + "\n" + item.detail +
+        (item.replacement && item.replacement !== "ongoing" ? "\nnext: " + item.replacement : "");
+      chip.setAttribute("aria-label", item.lane + ": " + item.label);
 
       var flag = document.createElement("span");
       flag.className = "capability-chip-flag";
@@ -400,109 +265,12 @@
     });
   }
 
-  function renderFocusRing(ringData) {
-    clearNode(focusRing);
-    focusLabel.textContent = "Center of Gravity";
-
-    var values = ringData.values;
-    var colors = ["#111111", "#2b6a4a", "rgba(17,17,17,0.24)"];
-    var startAngle = 0;
-    var cx = 60;
-    var cy = 60;
-    var outer = 49;
-    var inner = 29;
-
-    focusRing.appendChild(svgEl("circle", {
-      cx: cx,
-      cy: cy,
-      r: outer,
-      fill: "none",
-      stroke: "rgba(17,17,17,0.08)",
-      "stroke-width": String(outer - inner)
-    }));
-
-    values.forEach(function (value, index) {
-      var sweep = value * 360;
-      var path = svgEl("path", {
-        d: donutArcPath(cx, cy, outer, inner, startAngle, startAngle + sweep),
-        fill: colors[index]
-      });
-      focusRing.appendChild(path);
-      startAngle += sweep + 2;
-    });
-
-    var centerText = svgEl("text", {
-      x: cx,
-      y: cy + 4,
-      "text-anchor": "middle",
-      "font-family": "'IBM Plex Mono', monospace",
-      "font-size": "11",
-      fill: "#111"
-    });
-    centerText.textContent = ringData.center;
-    focusRing.appendChild(centerText);
-  }
-
-  function renderCopyGrid(fillCount) {
-    clearNode(copyGrid);
-
-    for (var i = 0; i < 72; i += 1) {
-      var cell = document.createElement("span");
-      cell.className = "copy-grid-cell";
-      if (i < fillCount) cell.classList.add("is-on");
-      copyGrid.appendChild(cell);
-    }
-  }
-
-  function renderStats(stats) {
-    clearNode(statsInline);
-
-    stats.forEach(function (item) {
-      var el = document.createElement("div");
-      el.className = "stat-inline-item";
-
-      var label = document.createElement("span");
-      label.className = "stat-inline-label";
-      label.textContent = item.label;
-
-      var value = document.createElement("span");
-      value.className = "stat-inline-value";
-      value.textContent = item.value;
-
-      el.appendChild(label);
-      el.appendChild(value);
-      statsInline.appendChild(el);
-    });
-  }
-
-  function renderTech(groups) {
-    clearNode(techStripGroups);
-    var names = ["current", "emerging", "next"];
-
-    groups.forEach(function (count, groupIndex) {
-      var group = document.createElement("div");
-      group.className = "tech-group";
-
-      for (var i = 0; i < 10; i += 1) {
-        var dot = document.createElement("span");
-        dot.className = "tech-dot";
-        if (i < count) {
-          dot.classList.add("is-on");
-          dot.classList.add("is-" + names[groupIndex]);
-        }
-        group.appendChild(dot);
-      }
-
-      techStripGroups.appendChild(group);
-    });
-  }
-
   function renderChart(chartData) {
     clearNode(svg);
 
     var W = 430;
     var H = 152;
-    var PAD = { top: 12, right: 68, bottom: 22, left: 0 };
+    var PAD = { top: 12, right: 18, bottom: 22, left: 0 };
     var BASE = H - PAD.bottom;
     var usableWidth = W - PAD.right - PAD.left;
     var usableHeight = BASE - PAD.top;
@@ -546,7 +314,7 @@
     var contentGroup = svgEl("g", { "clip-path": "url(#chart-reveal-clip)" });
     svg.appendChild(contentGroup);
 
-    chartData.series.forEach(function (series, seriesIndex) {
+    chartData.series.forEach(function (series) {
       var points = series.values.map(function (value, index) {
         return {
           x: PAD.left + usableWidth * (index / (series.values.length - 1)),
@@ -561,7 +329,7 @@
         "stroke-width": String(series.width),
         "stroke-linecap": "round",
         "stroke-linejoin": "round",
-        "stroke-opacity": seriesIndex === 0 ? "0.9" : "0.82"
+        "stroke-opacity": "0.9"
       });
       contentGroup.appendChild(path);
 
@@ -574,31 +342,7 @@
         stroke: series.color,
         "stroke-width": "1.8"
       }));
-
-      var label = svgEl("text", {
-        x: String(W - PAD.right + 10),
-        y: String(last.y + (seriesIndex - 1) * 11 + 3),
-        fill: series.color,
-        "font-family": "'IBM Plex Mono', monospace",
-        "font-size": "10"
-      });
-      label.textContent = series.label;
-      svg.appendChild(label);
     });
-
-    var heroPoints = chartData.series[0].values;
-    var heroX = PAD.left + usableWidth * 0.52;
-    var heroY = BASE - usableHeight * (heroPoints[Math.floor(heroPoints.length * 0.6)] / 100) - 12;
-    var caption = svgEl("text", {
-      x: String(clamp(heroX, 28, W - PAD.right - 50)),
-      y: String(heroY),
-      fill: "#111",
-      "font-family": "'IBM Plex Mono', monospace",
-      "font-size": "10",
-      "font-weight": "600"
-    });
-    caption.textContent = chartData.caption;
-    contentGroup.appendChild(caption);
 
     var startLabel = svgEl("text", {
       x: String(PAD.left),
@@ -634,15 +378,8 @@
     setMonth(scene.month, animate);
     setYear(scene.year, animate);
     dateAnnouncer.textContent = scene.month + " " + scene.year;
-
     renderChart(scene.chart);
-    renderCapabilities(scene.capabilities);
-    renderFocusRing(scene.ring);
-    copyCount.textContent = scene.copies.count;
-    copyCaption.textContent = scene.copies.caption;
-    renderCopyGrid(scene.copies.fill);
-    renderStats(scene.stats);
-    renderTech(scene.tech);
+    renderBenchmarks(scene.benchmarks);
   }
 
   function switchScene(sceneId) {
