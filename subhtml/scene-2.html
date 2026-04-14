@@ -126,25 +126,25 @@
     <rect x="16" y="16" width="688" height="300" rx="24" fill="#fffaf1" stroke="rgba(23,21,18,0.12)" />
     <text x="42" y="50" fill="#4d5652" font-size="22" font-family="Manrope, sans-serif">few-shot CoT prompt</text>
     <rect x="42" y="78" width="286" height="198" rx="18" fill="#f0eadf" />
-    <g fill="#171512" font-size="16" font-family="IBM Plex Mono, monospace">
+    <g fill="#171512" font-size="14" font-family="IBM Plex Mono, monospace">
       <text x="64" y="112">Q: If 3 bags hold 12 apples,</text>
-      <text x="64" y="136">how many apples are in 5 bags?</text>
-      <text x="64" y="168">A: 3 bags = 12 apples.</text>
-      <text x="64" y="192">One bag = 4 apples.</text>
-      <text x="64" y="216">So 5 bags = 20 apples.</text>
-      <text x="64" y="248">...</text>
+      <text x="64" y="134">how many apples in 5 bags?</text>
+      <text x="64" y="164">A: 3 bags = 12 apples.</text>
+      <text x="64" y="186">One bag = 4 apples.</text>
+      <text x="64" y="208">So 5 bags = 20 apples.</text>
+      <text x="64" y="242">...</text>
     </g>
     <path d="M352 164 H410" stroke="#bba67d" stroke-width="6" stroke-linecap="round" />
     <path d="M396 148 L420 164 L396 180" fill="none" stroke="#bba67d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
     <rect x="438" y="78" width="224" height="198" rx="18" fill="#2b6a4a" opacity="0.1" />
-    <g fill="#2b6a4a" font-size="17" font-family="IBM Plex Mono, monospace">
+    <g fill="#2b6a4a" font-size="13" font-family="IBM Plex Mono, monospace">
       <text x="462" y="112">reasoning trace</text>
     </g>
-    <g fill="#171512" font-size="17" font-family="Manrope, sans-serif">
-      <text x="462" y="150">1. Break problem down</text>
-      <text x="462" y="178">2. Solve intermediate step</text>
-      <text x="462" y="206">3. State final answer</text>
-      <text x="462" y="246">Answer: 20</text>
+    <g fill="#171512" font-size="15" font-family="Manrope, sans-serif">
+      <text x="462" y="148">1. Break problem down</text>
+      <text x="462" y="174">2. Solve intermediate step</text>
+      <text x="462" y="200">3. State final answer</text>
+      <text x="462" y="242" font-weight="600" fill="#2b6a4a">Answer: 20</text>
     </g>
   </svg>
   <figcaption>数問の「考え方つき解答」を見せるだけで、同じモデルの推論精度が大きく上がることを示した few-shot CoT のイメージ図です。</figcaption>
@@ -163,20 +163,20 @@
     <rect x="16" y="16" width="688" height="276" rx="24" fill="#fffaf1" stroke="rgba(23,21,18,0.12)" />
     <text x="42" y="50" fill="#4d5652" font-size="22" font-family="Manrope, sans-serif">zero-shot CoT trigger</text>
     <rect x="42" y="88" width="280" height="154" rx="18" fill="#f0eadf" />
-    <g fill="#171512" font-size="17" font-family="Manrope, sans-serif">
-      <text x="62" y="126">Question: A train leaves at 8.</text>
-      <text x="62" y="154">It arrives 3 hours later.</text>
-      <text x="62" y="182">What time is it?</text>
-      <text x="62" y="218">Let's think step by step.</text>
+    <g fill="#171512" font-size="15.5" font-family="Manrope, sans-serif">
+      <text x="62" y="124">Question: A train leaves at 8.</text>
+      <text x="62" y="150">It arrives 3 hours later.</text>
+      <text x="62" y="176">What time is it?</text>
     </g>
+    <text x="62" y="218" fill="#2b6a4a" font-size="15.5" font-weight="600" font-family="Manrope, sans-serif">Let's think step by step.</text>
     <path d="M350 164 H408" stroke="#bba67d" stroke-width="6" stroke-linecap="round" />
     <path d="M394 148 L418 164 L394 180" fill="none" stroke="#bba67d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
     <rect x="434" y="78" width="232" height="174" rx="18" fill="#2b6a4a" opacity="0.1" />
-    <g fill="#171512" font-size="17" font-family="Manrope, sans-serif">
+    <g fill="#171512" font-size="15.5" font-family="Manrope, sans-serif">
       <text x="456" y="120">Start from 8.</text>
       <text x="456" y="148">Add 3 hours.</text>
       <text x="456" y="176">8 + 3 = 11.</text>
-      <text x="456" y="214">Answer: 11 o'clock.</text>
+      <text x="456" y="214" font-weight="600" fill="#2b6a4a">Answer: 11 o'clock.</text>
     </g>
   </svg>
   <figcaption>プロンプトの末尾に一文足すだけで、モデルの出力に「途中の考え方」が現れるゼロショット CoT のイメージ図です。</figcaption>
@@ -345,7 +345,7 @@
   </div>
 </details>
 
-<h3>2-7. この時期の経済的風景 ── 「補助ツール」として価値が立ち上がる</h3>
+<h3>2-7. この時期の経済的風景: 「補助ツール」としての価値</h3>
 <p>
   この時代の経済的風景を象徴する製品がひとつあります。GitHub Copilot です。
 </p>
@@ -362,7 +362,7 @@
   2022年6月の一般提供時点で、GitHub はすでに過去12か月で 120万人超の開発者がテクニカルプレビューに参加したと述べています。
   <a class="ref" href="#src-s2-24" data-level="3">s2-24</a>
 </p>
-<p class="fn">注: IDE は、コード編集や実行、補完、デバッグなどをまとめて行うための統合開発環境です。</p>
+<p class="fn">注: IDE は、コード編集や実行、補完、デバッグなどをまとめて行うための統合開発環境のことです。プログラマ向けの贅沢なメモ帳のようなものだと思ってください</p>
 <p>
   そして 2022年9月には、まったく別の方向から LLM の価値を証明するサービスが現れます。Character.AI です。
 </p>

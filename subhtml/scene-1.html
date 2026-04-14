@@ -2,7 +2,7 @@
 <h2>"事前学習モデル"がやってきた</h2>
 <p>
   いま私たちは、ChatGPT のような対話型 AI に向かって、気軽にいろいろなお願いができます。
-  「この記事を三行で要約して」「この記事の評価を教えて」「この記事の論点を整理して」そんなふうにお願いすれば、
+  <button type="button" class="scene1-prompt-trigger" data-scene1-prompt="summary">「この記事を三行で要約して」</button><button type="button" class="scene1-prompt-trigger" data-scene1-prompt="review">「この記事の評価を教えて」</button><button type="button" class="scene1-prompt-trigger" data-scene1-prompt="issues">「この記事の論点を整理して」</button>そんなふうにお願いすれば、
   とりあえず何かしらの返事が返ってきますよね。
 </p>
 <p>でも実は、これはつい最近まで当たり前のことではありませんでした。</p>
@@ -156,7 +156,7 @@
   </div>
 </details>
 
-<button class="inline-demo-button" type="button" disabled>GLUE の一部である CoLA を実際にプレイしてみる（準備中）</button>
+<button class="inline-demo-button" id="cola-quiz-trigger" type="button" disabled>GLUE の一部である CoLA を実際にプレイしてみる（準備中）</button>
 
 <h3>1-3. 2019年、GPT-2 が見せた「文章を延々と書く機械」</h3>
 <p>
@@ -170,57 +170,128 @@
 </p>
 
 <figure class="article-figure">
-  <svg viewBox="0 0 720 380" role="img" aria-labelledby="scene1-fig1-title scene1-fig1-desc">
+  <svg viewBox="0 0 720 430" role="img" aria-labelledby="scene1-fig1-title scene1-fig1-desc">
     <title id="scene1-fig1-title">GPT-2 の多数のパラメータをつまみに見立てた模式図</title>
-    <desc id="scene1-fig1-desc">Transformer のブロックを模した格子の中に多数のノブと接続線を配置し、調整つまみの多さを表現する図。</desc>
+    <desc id="scene1-fig1-desc">ニューラルネットワークのノード間をつなぐ線（重み）がパラメータであることを示す図。入力層から隠れ層を経て出力層へ至る接続線の一本一本が調整つまみに相当する。</desc>
     <defs>
-      <linearGradient id="scene1-grid" x1="0" y1="0" x2="1" y2="1">
+      <linearGradient id="scene1-bg" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0%" stop-color="#fffaf1" />
-        <stop offset="100%" stop-color="#efe6d5" />
+        <stop offset="100%" stop-color="#f0eadf" />
       </linearGradient>
-      <linearGradient id="scene1-accent" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#2b6a4a" />
-        <stop offset="100%" stop-color="#bba67d" />
-      </linearGradient>
+      <filter id="scene1-glow">
+        <feGaussianBlur stdDeviation="2" result="blur" />
+        <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+      </filter>
     </defs>
-    <rect x="18" y="18" width="684" height="344" rx="24" fill="url(#scene1-grid)" stroke="rgba(23,21,18,0.12)" />
-    <text x="42" y="58" fill="#4d5652" font-size="24" font-family="Manrope, sans-serif">parameter knobs inside a Transformer</text>
-    <g stroke="rgba(23,21,18,0.1)" stroke-width="2">
-      <path d="M82 112 H640" />
-      <path d="M82 188 H640" />
-      <path d="M82 264 H640" />
+
+    <!-- background -->
+    <rect x="0" y="0" width="720" height="430" rx="24" fill="url(#scene1-bg)" stroke="rgba(23,21,18,0.10)" />
+
+    <!-- title -->
+    <text x="360" y="38" text-anchor="middle" fill="#4d5652" font-size="19" font-family="Manrope, sans-serif">ニューラルネットの「重み」＝ パラメータ（調整つまみ）</text>
+
+    <!-- ===== connections (weights) — drawn first so nodes sit on top ===== -->
+    <!-- Each line = one parameter. Varying opacity shows different weight values. -->
+    <!-- Input(4) → Hidden1(5) : 20 connections -->
+    <g stroke="#2b6a4a" stroke-width="1.4" opacity="0.22">
+      <!-- from input 0 -->
+      <line x1="110" y1="90" x2="240" y2="72" /><line x1="110" y1="90" x2="240" y2="132" /><line x1="110" y1="90" x2="240" y2="192" /><line x1="110" y1="90" x2="240" y2="252" /><line x1="110" y1="90" x2="240" y2="312" />
+      <!-- from input 1 -->
+      <line x1="110" y1="160" x2="240" y2="72" /><line x1="110" y1="160" x2="240" y2="132" /><line x1="110" y1="160" x2="240" y2="192" /><line x1="110" y1="160" x2="240" y2="252" /><line x1="110" y1="160" x2="240" y2="312" />
+      <!-- from input 2 -->
+      <line x1="110" y1="230" x2="240" y2="72" /><line x1="110" y1="230" x2="240" y2="132" /><line x1="110" y1="230" x2="240" y2="192" /><line x1="110" y1="230" x2="240" y2="252" /><line x1="110" y1="230" x2="240" y2="312" />
+      <!-- from input 3 -->
+      <line x1="110" y1="300" x2="240" y2="72" /><line x1="110" y1="300" x2="240" y2="132" /><line x1="110" y1="300" x2="240" y2="192" /><line x1="110" y1="300" x2="240" y2="252" /><line x1="110" y1="300" x2="240" y2="312" />
     </g>
-    <g fill="none" stroke="url(#scene1-accent)" stroke-width="4">
-      <rect x="82" y="88" width="118" height="52" rx="14" />
-      <rect x="228" y="88" width="118" height="52" rx="14" />
-      <rect x="374" y="88" width="118" height="52" rx="14" />
-      <rect x="520" y="88" width="118" height="52" rx="14" />
-      <rect x="120" y="164" width="118" height="52" rx="14" />
-      <rect x="266" y="164" width="118" height="52" rx="14" />
-      <rect x="412" y="164" width="118" height="52" rx="14" />
-      <rect x="158" y="240" width="118" height="52" rx="14" />
-      <rect x="304" y="240" width="118" height="52" rx="14" />
-      <rect x="450" y="240" width="118" height="52" rx="14" />
+    <!-- Hidden1(5) → Hidden2(6) : 30 connections -->
+    <g stroke="#2b6a4a" stroke-width="1.2" opacity="0.18">
+      <line x1="240" y1="72" x2="380" y2="62" /><line x1="240" y1="72" x2="380" y2="110" /><line x1="240" y1="72" x2="380" y2="158" /><line x1="240" y1="72" x2="380" y2="206" /><line x1="240" y1="72" x2="380" y2="254" /><line x1="240" y1="72" x2="380" y2="322" />
+      <line x1="240" y1="132" x2="380" y2="62" /><line x1="240" y1="132" x2="380" y2="110" /><line x1="240" y1="132" x2="380" y2="158" /><line x1="240" y1="132" x2="380" y2="206" /><line x1="240" y1="132" x2="380" y2="254" /><line x1="240" y1="132" x2="380" y2="322" />
+      <line x1="240" y1="192" x2="380" y2="62" /><line x1="240" y1="192" x2="380" y2="110" /><line x1="240" y1="192" x2="380" y2="158" /><line x1="240" y1="192" x2="380" y2="206" /><line x1="240" y1="192" x2="380" y2="254" /><line x1="240" y1="192" x2="380" y2="322" />
+      <line x1="240" y1="252" x2="380" y2="62" /><line x1="240" y1="252" x2="380" y2="110" /><line x1="240" y1="252" x2="380" y2="158" /><line x1="240" y1="252" x2="380" y2="206" /><line x1="240" y1="252" x2="380" y2="254" /><line x1="240" y1="252" x2="380" y2="322" />
+      <line x1="240" y1="312" x2="380" y2="62" /><line x1="240" y1="312" x2="380" y2="110" /><line x1="240" y1="312" x2="380" y2="158" /><line x1="240" y1="312" x2="380" y2="206" /><line x1="240" y1="312" x2="380" y2="254" /><line x1="240" y1="312" x2="380" y2="322" />
     </g>
-    <g fill="#2b6a4a">
-      <circle cx="141" cy="114" r="12" />
-      <circle cx="287" cy="114" r="12" />
-      <circle cx="433" cy="114" r="12" />
-      <circle cx="579" cy="114" r="12" />
-      <circle cx="179" cy="190" r="12" />
-      <circle cx="325" cy="190" r="12" />
-      <circle cx="471" cy="190" r="12" />
-      <circle cx="217" cy="266" r="12" />
-      <circle cx="363" cy="266" r="12" />
-      <circle cx="509" cy="266" r="12" />
+    <!-- Hidden2(6) → Hidden3(5) : 30 connections -->
+    <g stroke="#2b6a4a" stroke-width="1.2" opacity="0.18">
+      <line x1="380" y1="62" x2="510" y2="72" /><line x1="380" y1="62" x2="510" y2="132" /><line x1="380" y1="62" x2="510" y2="192" /><line x1="380" y1="62" x2="510" y2="252" /><line x1="380" y1="62" x2="510" y2="312" />
+      <line x1="380" y1="110" x2="510" y2="72" /><line x1="380" y1="110" x2="510" y2="132" /><line x1="380" y1="110" x2="510" y2="192" /><line x1="380" y1="110" x2="510" y2="252" /><line x1="380" y1="110" x2="510" y2="312" />
+      <line x1="380" y1="158" x2="510" y2="72" /><line x1="380" y1="158" x2="510" y2="132" /><line x1="380" y1="158" x2="510" y2="192" /><line x1="380" y1="158" x2="510" y2="252" /><line x1="380" y1="158" x2="510" y2="312" />
+      <line x1="380" y1="206" x2="510" y2="72" /><line x1="380" y1="206" x2="510" y2="132" /><line x1="380" y1="206" x2="510" y2="192" /><line x1="380" y1="206" x2="510" y2="252" /><line x1="380" y1="206" x2="510" y2="312" />
+      <line x1="380" y1="254" x2="510" y2="72" /><line x1="380" y1="254" x2="510" y2="132" /><line x1="380" y1="254" x2="510" y2="192" /><line x1="380" y1="254" x2="510" y2="252" /><line x1="380" y1="254" x2="510" y2="312" />
+      <line x1="380" y1="322" x2="510" y2="72" /><line x1="380" y1="322" x2="510" y2="132" /><line x1="380" y1="322" x2="510" y2="192" /><line x1="380" y1="322" x2="510" y2="252" /><line x1="380" y1="322" x2="510" y2="312" />
     </g>
-    <g fill="#605c54" font-size="18" font-family="IBM Plex Mono, monospace">
-      <text x="95" y="330">1.5B parameters</text>
-      <text x="298" y="330">more knobs</text>
-      <text x="474" y="330">more patterns</text>
+    <!-- Hidden3(5) → Output(3) : 15 connections -->
+    <g stroke="#2b6a4a" stroke-width="1.4" opacity="0.22">
+      <line x1="510" y1="72" x2="620" y2="132" /><line x1="510" y1="72" x2="620" y2="192" /><line x1="510" y1="72" x2="620" y2="252" />
+      <line x1="510" y1="132" x2="620" y2="132" /><line x1="510" y1="132" x2="620" y2="192" /><line x1="510" y1="132" x2="620" y2="252" />
+      <line x1="510" y1="192" x2="620" y2="132" /><line x1="510" y1="192" x2="620" y2="192" /><line x1="510" y1="192" x2="620" y2="252" />
+      <line x1="510" y1="252" x2="620" y2="132" /><line x1="510" y1="252" x2="620" y2="192" /><line x1="510" y1="252" x2="620" y2="252" />
+      <line x1="510" y1="312" x2="620" y2="132" /><line x1="510" y1="312" x2="620" y2="192" /><line x1="510" y1="312" x2="620" y2="252" />
     </g>
+
+    <!-- ===== highlight a few connections to show "this line = a weight" ===== -->
+    <line x1="110" y1="160" x2="240" y2="132" stroke="#c9853a" stroke-width="2.8" opacity="0.85" filter="url(#scene1-glow)" />
+    <line x1="240" y1="132" x2="380" y2="206" stroke="#c9853a" stroke-width="2.8" opacity="0.85" filter="url(#scene1-glow)" />
+    <line x1="380" y1="206" x2="510" y2="192" stroke="#c9853a" stroke-width="2.8" opacity="0.85" filter="url(#scene1-glow)" />
+
+    <!-- ===== nodes ===== -->
+    <!-- Input layer -->
+    <g>
+      <circle cx="110" cy="90"  r="16" fill="#f7f2e8" stroke="#2b6a4a" stroke-width="2.5" />
+      <circle cx="110" cy="160" r="16" fill="#f7f2e8" stroke="#2b6a4a" stroke-width="2.5" />
+      <circle cx="110" cy="230" r="16" fill="#f7f2e8" stroke="#2b6a4a" stroke-width="2.5" />
+      <circle cx="110" cy="300" r="16" fill="#f7f2e8" stroke="#2b6a4a" stroke-width="2.5" />
+    </g>
+    <!-- Hidden layer 1 -->
+    <g>
+      <circle cx="240" cy="72"  r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+      <circle cx="240" cy="132" r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+      <circle cx="240" cy="192" r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+      <circle cx="240" cy="252" r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+      <circle cx="240" cy="312" r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+    </g>
+    <!-- Hidden layer 2 -->
+    <g>
+      <circle cx="380" cy="62"  r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+      <circle cx="380" cy="110" r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+      <circle cx="380" cy="158" r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+      <circle cx="380" cy="206" r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+      <circle cx="380" cy="254" r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+      <circle cx="380" cy="322" r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+    </g>
+    <!-- Hidden layer 3 -->
+    <g>
+      <circle cx="510" cy="72"  r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+      <circle cx="510" cy="132" r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+      <circle cx="510" cy="192" r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+      <circle cx="510" cy="252" r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+      <circle cx="510" cy="312" r="14" fill="#d4e8da" stroke="#2b6a4a" stroke-width="2" />
+    </g>
+    <!-- Output layer -->
+    <g>
+      <circle cx="620" cy="132" r="16" fill="#f7f2e8" stroke="#2b6a4a" stroke-width="2.5" />
+      <circle cx="620" cy="192" r="16" fill="#f7f2e8" stroke="#2b6a4a" stroke-width="2.5" />
+      <circle cx="620" cy="252" r="16" fill="#f7f2e8" stroke="#2b6a4a" stroke-width="2.5" />
+    </g>
+
+    <!-- ===== layer labels ===== -->
+    <text x="110" y="345" text-anchor="middle" fill="#605c54" font-size="13" font-family="Manrope, sans-serif">入力</text>
+    <text x="310" y="370" text-anchor="middle" fill="#605c54" font-size="13" font-family="Manrope, sans-serif">隠れ層（実際にはもっと大量に層がある）</text>
+    <text x="620" y="295" text-anchor="middle" fill="#605c54" font-size="13" font-family="Manrope, sans-serif">出力</text>
+
+    <!-- ===== annotation: highlight line = weight ===== -->
+    <line x1="398" y1="206" x2="440" y2="230" stroke="#c9853a" stroke-width="2" />
+    <g transform="translate(442, 236)">
+      <rect x="0" y="-14" width="210" height="42" rx="8" fill="#fdf6ec" stroke="#c9853a" stroke-width="1.2" />
+      <text x="10" y="4" fill="#8a6530" font-size="13" font-family="Manrope, sans-serif">← この線 1 本 ＝ パラメータ 1 個</text>
+      <text x="22" y="22" fill="#8a6530" font-size="12" font-family="Manrope, sans-serif">（数値の大きさを調整するつまみ）</text>
+    </g>
+
+    <!-- ===== bottom caption ===== -->
+    <text x="360" y="405" text-anchor="middle" fill="#605c54" font-size="15" font-family="IBM Plex Mono, monospace">
+      GPT-2: こうした接続が約 15 億本 (1.5B)
+    </text>
   </svg>
-  <figcaption>GPT-2 の「15億個の調整つまみ」を、Transformer ブロックの中に散らばるノブとして描いた仮図です。</figcaption>
 </figure>
 
 <p>GPT-2 には、二つの意味で驚きがありました。</p>
@@ -274,17 +345,17 @@
     <path d="M238 164 H306" stroke="#bba67d" stroke-width="6" stroke-linecap="round" />
     <path d="M292 148 L316 164 L292 180" fill="none" stroke="#bba67d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
     <rect x="330" y="72" width="330" height="184" rx="18" fill="#f0eadf" />
-    <g fill="#605c54" font-size="16" font-family="IBM Plex Mono, monospace">
-      <text x="356" y="114">generated text stream</text>
+    <g fill="#605c54" font-size="14" font-family="IBM Plex Mono, monospace">
+      <text x="356" y="110">generated text stream</text>
     </g>
-    <g fill="#171512" font-size="17" font-family="Manrope, sans-serif">
-      <text x="356" y="146">...discovered a herd of unicorns living in</text>
-      <text x="356" y="174">a remote valley, speaking a language that</text>
-      <text x="356" y="202">looked structured enough to feel like prose.</text>
-      <text x="356" y="230">The article kept going, paragraph after paragraph.</text>
+    <g fill="#171512" font-size="15.5" font-family="Manrope, sans-serif">
+      <text x="356" y="138">...discovered a herd of unicorns</text>
+      <text x="356" y="162">in a remote valley. The animals</text>
+      <text x="356" y="186">spoke a structured language.</text>
+      <text x="356" y="210">The story went on for paragraphs,</text>
+      <text x="356" y="234">growing more detailed each time.</text>
     </g>
   </svg>
-  <figcaption>短いプロンプトからもっともらしい段落が連なっていく、GPT-2 時代の驚きをそのまま見せるための仮図です。</figcaption>
 </figure>
 
 <p>
@@ -482,3 +553,78 @@
 <p>
   そして、次のセクションで起きる変化はまさにそこを突きます。モデルそのものが急に万能になったからではありません。アクセスの形が変わったからです。論文の成果が、API という「製品」として市場に放たれます。
 </p>
+
+<div class="scene1-chat-modal" id="scene1-chat-modal" hidden aria-hidden="true">
+  <div class="scene1-chat-modal__backdrop" data-scene1-modal-close></div>
+  <div class="scene1-chat-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="scene1-chat-modal-title">
+    <div class="scene1-chat-modal__header">
+      <div class="scene1-chat-modal__heading">
+        <p class="scene1-chat-modal__eyebrow">ChatGPT style preview</p>
+        <h3 id="scene1-chat-modal-title">記事アシスタント</h3>
+      </div>
+      <div class="scene1-chat-modal__meta">
+        <span class="scene1-chat-modal__model">GPT-5.4-thinking-high</span>
+        <button type="button" class="scene1-chat-modal__close" aria-label="閉じる" data-scene1-modal-close>×</button>
+      </div>
+    </div>
+    <div class="scene1-chat-thread">
+      <div class="scene1-chat-message scene1-chat-message--user">
+        <div class="scene1-chat-bubble scene1-chat-bubble--user">
+          <p class="scene1-chat-bubble__label">Prompt</p>
+          <p class="scene1-chat-bubble__prompt" data-scene1-prompt-text></p>
+        </div>
+      </div>
+      <div class="scene1-chat-message scene1-chat-message--assistant">
+        <div class="scene1-chat-avatar" aria-hidden="true">GPT</div>
+        <div class="scene1-chat-bubble scene1-chat-bubble--assistant">
+          <p class="scene1-chat-bubble__label">Answer</p>
+          <div class="scene1-chat-response" data-scene1-response-body></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<template id="scene1-response-summary">
+  <p>この記事は、2018年前後の事前学習モデルの登場によって、言語AIが「用途ごとの専用機械」から「多用途に使い回せる基盤モデル」へ変わっていった流れをたどっています。</p>
+  <p>つづいて、API化とスケーリング、さらにChatGPTの登場によって、LLMは研究室の技術から、一般ユーザーや企業が日常的に使う社会的インフラへ広がったと描いています。</p>
+  <p>そして現在は、推論強化・ツール利用・エージェント化によって、LLMが「補助ツール」から「限定的に仕事を代行する存在」へ近づいている、というのが全体の結論です。</p>
+  <p class="scene1-chat-signoff">by GPT-5.4-thinking-high</p>
+</template>
+
+<template id="scene1-response-review">
+  <p>総合すると、<strong>かなり良い記事</strong>です。読み物としては <strong>8.5/10 前後</strong>、研究史としては <strong>「優れた一般向け解説だが、最終的な決定版ではない」</strong> という評価です。この記事は最初から「仮設ページ」であり、2018年から2026年4月までを転換点ごとにたどる大きな構成を取り、最後に参考文献セクションまで用意しています。完成度の高い長編解説として読めます。</p>
+  <p>良いところは、まず<strong>説明のうまさ</strong>です。専門用語をいきなり振り回さず、「事前学習→微調整」「zero-shot / few-shot」「RLHF」などを日常的なたとえで噛み砕いていて、技術史なのに読みやすいです。さらに、コラム、折りたたみ補足、ブラウザ上の比較デモまで入っていて、単なる年表ではなく「理解の補助線」が多い構成になっています。一般読者に向けた導線としてはかなり丁寧です。</p>
+  <p>次に、<strong>構成がよく整理されている</strong>のも強みです。2018–2020、2020–2022、2022–2024、2024–2025、2026–と段階を切っており、各章ごとに「何が変わったのか」を一本の筋で見せようとしているので、分野の流れを掴みやすいです。特に「研究上の変化」と「市場・製品化の変化」を並べている点は、LLM史を単なるモデル比較で終わらせていません。</p>
+  <p>さらに、<strong>出典の扱いがかなり誠実</strong>です。参考文献に Lv1〜Lv4 の区分を設けて、「査読論文」「企業公式」「報道」「コミュニティ報告」を分けているのは良い実務です。読者に「どの話がどの程度の確かさなのか」を見せようとしているので、一般向け記事としてはかなり信頼感があります。</p>
+  <p>もう一つ良いのは、<strong>歴史記述と未来予想を分けようとしていること</strong>です。2026年以降の章に入る前に、「ここからは歴史の記録ではなく、延長線上の問いかけだ」と明示していて、記述モードを切り替えています。ここを曖昧にしないのは、長い歴史記事として大事な態度です。</p>
+  <p>一方で、弱点もあります。最大の弱点は、<strong>長さと密度の高さ</strong>です。内容は豊富ですが、補足コラムやデモが多く、主線だけを追いたい読者には少し重いです。展示型コンテンツとしては魅力ですが、記事としては「読ませる力」と「情報量」が拮抗していて、途中で疲れる人は出そうです。</p>
+  <p>次に、<strong>物語として上手すぎるぶん、歴史がやや一本線に見える</strong>ところがあります。章立て自体が「転換点」の連続になっているので、読者は「pretraining から API、chat UI、tool、agent へ必然的に進んだ」と受け取りやすいです。もちろん解説記事としては有効ですが、実際の歴史はもっと並行的で、脇道や失敗例、地域差、研究上の袋小路も多かったはずです。この記事はそこをかなり整理して、強いストーリーにしています。</p>
+  <p>また、<strong>後半ほど時事性に依存しやすい</strong>です。2024年秋から2026年春の章では、モデルの更新年表や各社の高速リリースをかなり細かく扱っており、そこはこの分野の性質上、最も古びやすい部分です。今は迫力がありますが、半年〜1年でメンテナンス負荷がかなり高くなるタイプの記事です。</p>
+  <p>加えて、<strong>出典レベルの差は透明化されているものの、読者には少し見えにくい</strong>かもしれません。参考文献では Lv1〜Lv4 を区別していますが、本文を流し読みすると、査読論文由来の話と企業発表・報道由来の話が同じテンポで読めてしまいます。つまり、書き方が滑らかなぶん、証拠の強弱が体感として均されやすいです。</p>
+  <p>なので結論としては、これは<strong>「一般向けの優秀な歴史解説」</strong>です。ただし、<strong>「厳密な学術史」や「完全に中立な通史」ではなく、よく編集されたナラティブ型の解説」</strong>として読むのがいちばん合っています。公開用コンテンツとしてはかなり強く、特に「これから LLM史を学ぶ人」「断片的な知識を一本につなぎたい人」にはとても良いです。逆に、研究者向けの決定版にするなら、章ごとの主張を少し削り、史実・論争・不確実性の切り分けをもう一段強くするとさらに良くなります。</p>
+  <p>史実の正誤を一件ずつ外部検証したわけではなく、今回は<strong>本文そのものの出来</strong>を中心に評価しました。</p>
+  <p class="scene1-chat-signoff">by GPT-5.4-thinking-high</p>
+</template>
+
+<template id="scene1-response-issues">
+  <p>この記事の論点は、ひと言でいうと <strong>「LLMの歴史は、モデル性能の年表というより、汎用モデルが社会に接続されていく過程の歴史だ」</strong> ということです。記事自体も、2018年から2026年以降までをいくつかの転換点に分けて、単なる技術進歩ではなく、アクセス形態・市場・評価軸・資本投入の変化として描いています。</p>
+  <p>まず出発点の論点は、<strong>2018年前後に「タスクごとの専用AI」から「事前学習した汎用モデル」へ発想が変わった</strong>ことです。GPT-1やBERTの登場で、「大量テキストで土台を作り、あとから個別用途に微調整する」という枠組みが標準化されました。ここでの争点は、モデルが賢くなったというより、「ひとつの基盤を多用途に使い回せるようになった」ことにあります。</p>
+  <p>次の論点は、<strong>2020〜2022年にAPI化によってLLMが“研究成果”から“借りられるインフラ”に変わった</strong>ことです。記事はここをかなり重視していて、pretraining → API → chat UI → tool → agent というアクセス形態の変化を主線に置いています。つまり重要なのは「モデルが存在したこと」だけでなく、「外部の開発者や企業がそれを自分のサービスに埋め込めるようになったこと」です。</p>
+  <p>この時期の補助線として、<strong>スケーリングの意味の変化</strong>も大きな論点です。GPT-3は「モデルを大きくすることに意味がある」と強く印象づけ、Chinchillaは「ただ大きければよいのではなく、モデル規模とデータ量には最適な比率がある」と修正を加えます。記事はここを、性能向上が職人芸ではなく、ある程度は計算資源と投資で買えるものになっていく過程として見ています。</p>
+  <p>さらに2020〜2022年のもう一つの重要点は、<strong>プロンプト工夫から指示追従そのものの学習へ</strong>という転換です。Chain-of-Thoughtや zero-shot prompting で「聞き方次第で賢く見える」ことがわかり、そこから instruction tuning と RLHF によって、モデル自体に「人の指示に従う」性質を後付けで学ばせる方向へ進みます。ここで記事が言いたいのは、LLMの価値はサイズだけでなく、どう振る舞わせるかにある、という点です。</p>
+  <p>2022年末以降の中心論点は、<strong>ChatGPTは技術そのものより“入口の形”を変えた</strong>ということです。GPT-3やInstructGPTはすでに存在していたが、ChatGPTは誰でもブラウザで即座に試せる会話UIにしたことで、技術を社会現象へ変えた。記事はここを「ニュースが体験になった瞬間」として扱っていて、AI Dungeon が「未来っぽい遊び」を見せたのに対し、ChatGPT は「仕事に使えるかもしれない」を人々に実感させた、と整理しています。</p>
+  <p>そのうえでGPT-4の論点は、<strong>入口を変えたChatGPTに対して、GPT-4は“天井”を引き上げた</strong>ことです。長い指示追従、複雑な理解、コード、数学、試験、さらにマルチモーダル対応によって、単に会話が自然なだけでなく、こなせる仕事の範囲が一段広がったと位置づけられています。同時に、評価基準もGLUEのような研究室的ベンチマークから、MMLU・GSM8K・Chatbot Arena のような「役に立つか」「人間が好むか」に移っていく、というのが記事の見立てです。</p>
+  <p>2023〜2024年の別の論点は、<strong>競争の広がりとオープンウェイト化</strong>です。OpenAIだけでなく、Google、Anthropic、Meta、Mistralなどが参入し、閉じた最先端モデルの競争と、LLaMA系を軸にした「自分で持ちたい」流れが並走します。記事はここで、APIで借りる世界と、自社で持って微調整する世界の違いを、思想ではなくコスト・機密性・自由度の違いとして描いています。</p>
+  <p>また、<strong>ツール呼び出しは“全部を知っているモデル”ではなく、“外部の道具箱につながるモデル”への転換</strong>として整理されています。function calling や RAG の重要性は、モデル単体の記憶力より、検索・計算・データベース参照などを組み合わせて役に立つ方向が本格化したことにあります。記事はこれを、後のエージェント時代の基本部品とみなしています。</p>
+  <p>2024年秋から2026年春にかけての主論点は、<strong>LLMが“補助”から“限定的な代行”へ近づいた</strong>ことです。o1 系以降の reasoning model は、事前学習だけでなく test-time scaling や事後学習の改善によって、答える前により長く考える方向へ進みました。記事はこの時期を、改善の速度そのものが上がった時代として描いています。</p>
+  <p>この段階では、評価の論点も変わります。記事によれば、もはや一つのベンチマーク点数だけで世界を語るのは危うく、SWE-Bench、GDPval、Remote Labor Index のような <strong>実際の仕事に近い評価</strong> が重視されるようになります。つまり、「どれだけ賢いか」より「どこまでまとまった仕事をやりきれるか」が問われ始めたわけです。</p>
+  <p>経済面で貫かれている論点は、<strong>LLMの歴史は資本とインフラの歴史でもある</strong>ということです。初期は研究は熱いが市場は冷たく、次にAPIで補助ツール市場が立ち上がり、ChatGPT以後は巨額資本が流れ込み、さらに2025年以降はデータセンター、GPU、電力、建設を含む国家級インフラ競争になっていく。記事は一貫して、能力向上の背後には計算資源の確保があると見ています。</p>
+  <p>最後に、この記事の締めの論点は少し性格が変わります。<strong>sec-5 以降は歴史の記述ではなく、そこから先への問い</strong>です。記事自身が、ここからは事実紹介よりも「まだ起きていないことの可能性」を語る節だと断っています。そこで中心に置かれるのが、AIがAI自身の開発を支援し始めた先にある <strong>再帰的自己改善</strong> という発想です。つまり、ここまでの歴史を「汎用モデルの成立 → 投資での拡張 → 社会への接続 → 推論とエージェント化 → AIによるAI開発支援」という一本の流れとして読み直し、その延長線がどこで止まるのかを問う構成になっています。</p>
+  <p>要するに、この論考の核は次の3点です。</p>
+  <p><strong>第一に、LLM史は性能向上の歴史である以上に、汎用モデルが社会へ接続される歴史であること。</strong></p>
+  <p><strong>第二に、その接続を変えたのは、事前学習・API・ChatGPT・ツール・エージェントという“入口の変化”だったこと。</strong></p>
+  <p><strong>第三に、その先では、AIが人間の補助から限定的代行へ進み、ついにはAI自身の改善ループに関わり始めるかもしれない、という問いまで視野に入っていることです。</strong></p>
+  <p>この記事そのものは『GPT以後のLLMの歴史』です。</p>
+  <p class="scene1-chat-signoff">by GPT-5.4-thinking-high</p>
+</template>
