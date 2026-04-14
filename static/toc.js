@@ -4,6 +4,17 @@
 (function () {
   "use strict";
 
+  function ready(fn) {
+    if (window.__sectionsReady && typeof window.__sectionsReady.then === "function") {
+      window.__sectionsReady.then(fn);
+      return;
+    }
+
+    fn();
+  }
+
+  ready(function () {
+
   var NS = "http://www.w3.org/2000/svg";
   var tocSvg = document.getElementById("toc-svg");
   if (!tocSvg) return;
@@ -156,4 +167,5 @@
 
   sections.forEach(function (sec) { observer.observe(sec); });
 
+  });
 })();

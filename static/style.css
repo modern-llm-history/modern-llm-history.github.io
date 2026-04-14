@@ -535,3 +535,284 @@ a {
     transition: none;
   }
 }
+
+/* ==========================================================================
+   Additional styles for full article
+   ========================================================================== */
+
+/* --- Subsection headings (h3) inside history-section --- */
+.history-section h3 {
+  margin-top: 2.8rem;
+  margin-bottom: 0.85rem;
+  font-size: clamp(1.35rem, 1.8vw, 1.7rem);
+  color: var(--ink);
+}
+
+.history-section h3:first-of-type {
+  margin-top: 1.8rem;
+}
+
+/* --- Source reference links --- */
+.ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15em;
+  font-size: 0.72em;
+  vertical-align: super;
+  line-height: 1;
+  text-decoration: none;
+  color: var(--accent);
+  opacity: 0.72;
+  transition: opacity 160ms ease;
+}
+
+.ref:hover {
+  opacity: 1;
+}
+
+.ref::before {
+  content: "[";
+}
+
+.ref::after {
+  content: "]";
+}
+
+/* Source level badges */
+.ref[data-level="4"]::after { content: " Lv4]"; }
+.ref[data-level="3"]::after { content: " Lv3]"; }
+.ref[data-level="2"]::after { content: " Lv2]"; }
+.ref[data-level="1"]::after { content: " Lv1]"; }
+
+/* --- Disclaimer block --- */
+.disclaimer-block {
+  margin: 1.2rem 0 2rem;
+  padding: 1rem 1.25rem;
+  border-left: 3px solid var(--accent-3);
+  background: rgba(187, 166, 125, 0.08);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.disclaimer-block p {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.disclaimer-block strong {
+  color: var(--ink);
+}
+
+/* --- Column (コラム) boxes --- */
+.column-box {
+  margin: 2rem 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: rgba(255, 252, 246, 0.42);
+  overflow: clip;
+}
+
+.column-box summary {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.85rem 1.1rem;
+  list-style: none;
+  cursor: pointer;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--accent-2);
+}
+
+.column-box summary::-webkit-details-marker {
+  display: none;
+}
+
+.column-box summary::before {
+  content: "📖";
+  font-size: 0.92rem;
+}
+
+.column-box summary::after {
+  content: "▶";
+  font-size: 0.68rem;
+  margin-left: auto;
+  transition: transform 200ms ease;
+}
+
+.column-box[open] summary::after {
+  transform: rotate(90deg);
+}
+
+.column-body {
+  padding: 0 1.2rem 1.2rem;
+  font-size: 0.95rem;
+  line-height: 1.85;
+  color: var(--ink);
+}
+
+.column-body p {
+  font-size: 0.95rem;
+  max-width: 39rem;
+}
+
+.column-body h4 {
+  margin: 1.2rem 0 0.5rem;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* --- Bottleneck summary blocks --- */
+.bottleneck-block {
+  margin: 2.5rem 0 0.5rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: var(--radius-md);
+  background: rgba(23, 21, 18, 0.035);
+  border: 1px solid var(--line);
+  font-size: 0.94rem;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.bottleneck-block p {
+  font-size: 0.94rem;
+  color: var(--muted);
+}
+
+.bottleneck-block strong {
+  color: var(--ink);
+}
+
+/* --- Emphasis/callout within text --- */
+.text-highlight {
+  background: linear-gradient(180deg, transparent 60%, rgba(187, 166, 125, 0.22) 60%);
+  padding: 0 0.15em;
+}
+
+/* --- Section 5 separation --- */
+.sec5-separator {
+  margin: 4rem 0 2rem;
+  padding: 1.5rem 0;
+  border-top: 2px solid var(--line-strong);
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-style: italic;
+}
+
+/* --- Source list at the end --- */
+.source-list {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--line);
+}
+
+.source-list h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.source-list ol {
+  padding-left: 1.6rem;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.source-list li {
+  margin-bottom: 0.35rem;
+}
+
+.source-list a {
+  word-break: break-all;
+}
+
+/* Level badge in source list */
+.level-badge {
+  display: inline-block;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.75em;
+  font-weight: 600;
+  line-height: 1;
+  vertical-align: middle;
+  margin-right: 0.3em;
+}
+
+.level-badge[data-l="4"] { background: rgba(43,106,74,0.12); color: var(--accent); }
+.level-badge[data-l="3"] { background: rgba(59,130,246,0.12); color: #2563eb; }
+.level-badge[data-l="2"] { background: rgba(245,158,11,0.12); color: #b45309; }
+.level-badge[data-l="1"] { background: rgba(139,133,123,0.12); color: var(--muted-soft); }
+
+/* WIP notice styling update */
+.site-wip {
+  display: none;
+}
+
+/* --- Blockquote --- */
+blockquote {
+  margin: 1.5rem 0;
+  padding: 0.8rem 1.2rem;
+  border-left: 3px solid var(--accent-3);
+  background: rgba(187, 166, 125, 0.06);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-size: 0.96rem;
+  color: var(--muted);
+}
+blockquote p { margin: 0.4em 0; }
+blockquote cite {
+  display: block;
+  margin-top: 0.5em;
+  font-size: 0.85em;
+  font-style: normal;
+  color: var(--muted-soft);
+}
+
+/* --- Footnote-style annotations --- */
+.fn {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0.3rem 0 1.2rem;
+  padding-left: 1em;
+  border-left: 2px solid var(--line);
+}
+
+/* --- Inline figure / stat --- */
+.stat-inline {
+  display: inline-block;
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+/* --- Key term first appearance --- */
+.term {
+  font-weight: 600;
+  color: var(--accent-2);
+}
+
+/* --- Section epigraph --- */
+.epigraph {
+  margin: 0 0 2rem;
+  padding: 1rem 1.2rem;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--ink);
+  border-left: 3px solid var(--accent);
+  background: rgba(43, 106, 74, 0.04);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* --- History section h4 --- */
+.history-section h4 {
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--accent-2);
+}

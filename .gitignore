@@ -3,3 +3,5 @@
 .playwright-mcp/*
 tmp/
 tmp/*
+draft/
+draft/*

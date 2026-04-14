@@ -23,7 +23,7 @@
           自己教師型の大規模なベースモデルを前提にしたLLMの歴史は、まだ10年にも満たないごく新しいものです。
           2018年の初代GPT登場から現在までの流れを、いくつかの転換点に分けて振り返ります。
         </p>
-        <p class="site-wip">🚧 仮設ページ — コンテンツは順次追加されます。全てのセクションは書きかけで、実際にはもっともっと、長くなります。AI-2027ほどではないですが、その半分ぐらいには。全文1万文字とか、そのレベル</p>
+        <p class="site-wip">🚧 仮設ページ — コンテンツは順次追加されます。</p>
       </header>
 
       <!-- ===== TOC (left sidebar) ===== -->
@@ -55,100 +55,49 @@
         </section>
 
         <!-- Scene 1 -->
-        <section id="scene-1" class="history-section" data-scene="scene-1" data-toc-label="2018–2020">
-          <time>2018-01 – 2020-05</time>
-          <h2>前提の転換</h2>
-          <p>
-            2018年のGPT-1とBERTは、「巨大な自己教師あり事前学習をまずやる」という発想を
-            NLP全体の前提に変えました。個別タスクごとに専用モデルを組むより、
-            まず巨大な言語モデルを作り、その上に微調整やプロンプトで乗るほうが強い、という感触が広く共有され始めます。
-          </p>
-          <p>
-            2019年のGPT-2、2020年のGPT-3はこの感触を決定的なものにしました。
-            モデル・データ・compute を素直に増やすだけで loss もベンチマークもきれいに改善し、
-            few-shot / zero-shot のような「事前学習済みモデルをその場で使う」スタイルが現実味を帯びます。
-          </p>
-          <p>
-            つまりこの時期の転換は、単にモデルが強くなったことではありません。
-            研究者や開発者の側が「まず pretrain するのが当然だ」という新しい常識に移行したこと自体が大きかったのです。
-          </p>
-        </section>
+        <section
+          id="scene-1"
+          class="history-section"
+          data-scene="scene-1"
+          data-toc-label="2018–2020"
+          data-subhtml="subhtml/scene-1.html"
+        ></section>
 
         <!-- Scene 2 -->
-        <section id="scene-2" class="history-section" data-scene="scene-2" data-toc-label="2020–2022">
-          <time>2020-06 – 2022-10</time>
-          <h2>スケーリングと商品化</h2>
-          <p>
-            GPT-3以後、汎用モデルは論文の中だけの存在ではなくなり、API として商品化され始めます。
-            「何でもそこそこできるモデル」を各社が外部に提供し、要約、分類、チャットボット、ゲームなど、
-            失敗コストの低いユースケースから実装が広がっていきました。
-          </p>
-          <p>
-            同時にこの時期は、スケーリング則が研究アジェンダの中心に座った時期でもあります。
-            Chinchilla によって compute 最適なスケールの考え方が整理され、
-            Gopher や PaLM など、大規模モデルの系譜は「どこまで伸ばせるか」をかなり工学的に詰める段階へ入ります。
-          </p>
-          <p>
-            研究の中心は依然として pretraining ですが、その成果物はもう研究室の中だけに留まらず、
-            API 経由で外部プロダクトへ流れ込み始めていました。
-          </p>
-        </section>
+        <section
+          id="scene-2"
+          class="history-section"
+          data-scene="scene-2"
+          data-toc-label="2020–2022"
+          data-subhtml="subhtml/scene-2.html"
+        ></section>
 
         <!-- Scene 3 -->
-        <section id="scene-3" class="history-section" data-scene="scene-3" data-toc-label="2022–2024">
-          <time>2022-11 – 2024-08</time>
-          <h2>ChatGPTによる社会化</h2>
-          <p>
-            2022年末のChatGPTは、LLMを専門家の話題から一気に一般社会の出来事へと変えました。
-            「巨大言語モデルがある」ではなく、「自分が会話できるものとしてそこにある」という形で受容されたことが決定的でした。
-          </p>
-          <p>
-            GPT-4 の登場と、その後の Claude 3、Gemini 1.5、GPT-4o などの競争により、
-            LLM は単なる研究成果ではなく、仕事道具・学習ツール・検索代替・創作支援として広く浸透します。
-            同時に Chatbot Arena や MMLU、GSM8K のような指標が「今どのモデルが強いのか」を可視化する共通言語になっていきます。
-          </p>
-          <p>
-            オープンウェイトの流れもLLaMA以後に一気に太くなり、ローカル実行や小型モデル活用が現実的になります。
-            この時期は、LLMが社会的なインフラの一部として見え始めた時期だと言えます。
-          </p>
-        </section>
+        <section
+          id="scene-3"
+          class="history-section"
+          data-scene="scene-3"
+          data-toc-label="2022–2024"
+          data-subhtml="subhtml/scene-3.html"
+        ></section>
 
         <!-- Scene 4 -->
-        <section id="scene-4" class="history-section" data-scene="scene-4" data-toc-label="2024–2025">
-          <time>2024-09 – 2025-12</time>
-          <h2>reasoner / agent / 実タスク評価</h2>
-          <p>
-            2024年後半からは、事前学習だけでは説明しきれない性能向上が前景化します。
-            長く考えさせる推論系モデル、外部ツールや長いコンテキストを前提にしたエージェント、そして
-            「数学が解けるか」「コード修正が通るか」といった実タスク評価が、フロンティアの中心へ移っていきました。
-          </p>
-          <p>
-            o1 / o3 系列、Claude 系の強化版、Gemini の推論寄りモデルなどは、
-            test-time scaling や探索の質そのものが差になることを示しました。
-            その評価軸も MMLU や GSM8K だけでは足りず、AIME、GPQA、SWE-bench、WebArena のような
-            もう少し現実に近いタスクへと更新されていきます。
-          </p>
-          <p>
-            ここで重要なのは、モデルの「賢さ」が抽象ベンチマークの上だけでなく、
-            実際にタスクをやり切れるかどうかで問われ始めたことです。
-          </p>
-        </section>
+        <section
+          id="scene-4"
+          class="history-section"
+          data-scene="scene-4"
+          data-toc-label="2024–2025"
+          data-subhtml="subhtml/scene-4.html"
+        ></section>
 
         <!-- Scene 5 -->
-        <section id="scene-5" class="history-section" data-scene="scene-5" data-toc-label="2026–">
-          <time>2026-01 –</time>
-          <h2>未来へ</h2>
-          <p>
-            2026年以降の論点は、単に「次のモデルが何点取るか」だけではありません。
-            持続的に作業を続ける agent、モデルがモデル開発を加速する再帰的なループ、
-            そして現実の組織や仕事の中でどこまで代替可能かが、より重要な問いになっていきます。
-          </p>
-          <p>
-            だからこそ未来のLLM史は、モデル名の年表であると同時に、
-            どの評価が信頼され、どの評価が飽和し、何が次の共通言語になるかの歴史でもあります。
-            この先は、ベンチマークと実務の距離そのものが問われ続けるはずです。
-          </p>
-        </section>
+        <section
+          id="scene-5"
+          class="history-section"
+          data-scene="scene-5"
+          data-toc-label="2026–"
+          data-subhtml="subhtml/scene-5.html"
+        ></section>
 
       </article>
 
@@ -186,6 +135,7 @@
       </aside>
     </main>
 
+    <script src="static/sections-loader.js" defer></script>
     <script src="static/chart.js" defer></script>
     <script src="static/toc.js" defer></script>
   </body>

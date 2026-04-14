@@ -4,6 +4,17 @@
 (function () {
   "use strict";
 
+  function ready(fn) {
+    if (window.__sectionsReady && typeof window.__sectionsReady.then === "function") {
+      window.__sectionsReady.then(fn);
+      return;
+    }
+
+    fn();
+  }
+
+  ready(function () {
+
   var NS = "http://www.w3.org/2000/svg";
 
   function svgEl(tag, attrs) {
@@ -73,10 +84,10 @@
       benchmarks: [
         { lane: "Pretrain", label: "LAMBADA 72.5%", level: "active", detail: "Long-context word prediction benchmark. Early signal that autoregressive pretraining transferred broadly.", replacement: "MMLU" },
         { lane: "Scaling", label: "Commonsense 63.8%", level: "mid", detail: "Placeholder umbrella for early commonsense benchmarks used to see scaling effects.", replacement: "PIQA" },
-        { lane: "API", label: "SSA 39/100", level: "off", detail: "Placeholder single-turn response quality eval before API productization solidified.", replacement: "SSI" },
+        { lane: "API", label: "N/A", level: "off", detail: "", replacement: "" },
         { lane: "Chat", label: "Humanness 2.6/5", level: "off", detail: "Early human-likeness judging before chat-native public rankings existed.", replacement: "Arena" },
         { lane: "Reason", label: "PIQA 68.3%", level: "off", detail: "Physical commonsense QA used as a proxy before dedicated reasoning evals took over.", replacement: "GSM8K" },
-        { lane: "Agents", label: "Tool-use 12%", level: "off", detail: "Placeholder proto-agent tool-use tasks. Agents were not yet a stable category.", replacement: "SWE-bench" }
+        { lane: "Agents", label: "N/A", level: "off", detail: "", replacement: "SWE-bench" }
       ]
     },
     "scene-2": {
@@ -147,12 +158,12 @@
         ]
       },
       benchmarks: [
-        { lane: "Pretrain", label: "WorldSense 84%", level: "mid", detail: "Placeholder future benchmark for broad multimodal world understanding.", replacement: "ongoing" },
-        { lane: "Scaling", label: "FrontierOps 91%", level: "active", detail: "Placeholder harder frontier benchmark family for post-2026 scaling.", replacement: "ongoing" },
-        { lane: "API", label: "Agentic Tool 88%", level: "active", detail: "Placeholder future tool-use eval focused on long-running assistant behavior.", replacement: "ongoing" },
-        { lane: "Chat", label: "SessionBench 4.7/5", level: "mid", detail: "Placeholder future long-session chat evaluation.", replacement: "ongoing" },
-        { lane: "Reason", label: "HLE-like 26%", level: "active", detail: "Placeholder extremely hard reasoning benchmark where low scores can still matter.", replacement: "ongoing" },
-        { lane: "Agents", label: "RE-Bench 62%", level: "active", detail: "Placeholder real-environment agent benchmark.", replacement: "ongoing" }
+        { lane: "Pretrain", label: "BullshitBench v2 91.0%", level: "mid", detail: "", replacement: "ongoing" },
+        { lane: "Scaling", label: "FrontierOps 91%", level: "active", detail: "", replacement: "ongoing" },
+        { lane: "API", label: "Terminal-Bench 2.0 82.9%", level: "active", detail: ".", replacement: "ongoing" },
+        { lane: "Chat", label: "SessionBench 4.7/5", level: "mid", detail: "", replacement: "ongoing" },
+        { lane: "Reason", label: "HLE 26%", level: "active", detail: "", replacement: "ongoing" },
+        { lane: "Agents", label: "RE-Bench 62%", level: "active", detail: "", replacement: "ongoing" }
       ]
     }
   };
@@ -435,4 +446,5 @@
     onScroll();
   });
   updateActiveScene();
+  });
 })();
