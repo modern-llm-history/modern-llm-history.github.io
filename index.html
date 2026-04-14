@@ -99,6 +99,14 @@
           data-subhtml="subhtml/scene-5.html"
         ></section>
 
+        <!-- Sources -->
+        <section
+          id="sources"
+          class="history-section"
+          data-toc-label="Sources"
+          data-subhtml="subhtml/sources.html"
+        ></section>
+
       </article>
 
       <!-- ===== Chart (right sidebar) ===== -->
@@ -126,6 +134,10 @@
                 <desc id="chart-desc-svg">スクロール位置に応じて各時代の compute カーブだけを表示する SVG グラフ。</desc>
               </svg>
             </div>
+            <p class="chart-source">
+              Training compute data: <a href="https://epoch.ai/data/ai-models">EPOCH AI model index</a> (CC-BY).
+              Each point is the mean of the top-2 models by <code>Training compute (FLOP)</code> available by that date.
+            </p>
 
             <div class="panel-meta-row panel-meta-row-benchmarks">
               <div class="capability-grid" id="capability-grid"></div>
@@ -136,6 +148,7 @@
     </main>
 
     <script src="static/sections-loader.js" defer></script>
+    <script src="static/scene-2-demo.js?v=20260414-2" defer></script>
     <script src="static/chart.js" defer></script>
     <script src="static/toc.js" defer></script>
   </body>

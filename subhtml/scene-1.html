@@ -1,11 +1,484 @@
 <time>2018-01 – 2020-05</time>
-<h2>前提の転換</h2>
+<h2>"事前学習モデル"がやってきた</h2>
 <p>
-  2019年のGPT-2、2020年のGPT-3はこの感触を決定的なものにしました。
-  モデル・データ・compute を素直に増やすだけで loss もベンチマークもきれいに改善し、
-  few-shot / zero-shot のような「事前学習済みモデルをその場で使う」スタイルが現実味を帯びます。
+  いま私たちは、ChatGPT のような対話型 AI に向かって、気軽にいろいろなお願いができます。
+  「この記事を三行で要約して」「この記事の評価を教えて」「この記事の論点を整理して」そんなふうにお願いすれば、
+  とりあえず何かしらの返事が返ってきますよね。
+</p>
+<p>でも実は、これはつい最近まで当たり前のことではありませんでした。</p>
+<p>
+  昔は、翻訳をさせたければ翻訳専用の AI を作る。迷惑メールを見分けたければ、また別の迷惑メール判定専用 AI を作る。
+  感情分析も、質問応答も、全部それぞれ専用。あるタスクでうまくいった AI を、そのまま別のタスクに使い回すのは簡単ではなく、
+  そのタスク専用に一から学習させるのが一般的でした。
 </p>
 <p>
-  つまりこの時期の転換は、単にモデルが強くなったことではありません。
-  研究者や開発者の側が「まず pretrain するのが当然だ」という新しい常識に移行したこと自体が大きかったのです。
+  これが 2010年代半ばまでの、自然言語処理（NLP）と呼ばれる研究分野の常識です。NLP とは、人間のことばをコンピュータに扱わせる技術の総称で、
+  いまの LLM もその流れの中にあります。
+</p>
+<p>
+  この常識をひっくり返したのが、2018年前後に一斉に広まった事前学習（pre-training）という考え方です。
+</p>
+<p>
+  発想そのものはシンプルです。まず第一段階として、インターネット上の文章や書籍のような大量のテキストを読ませて、
+  モデルに言葉の使われ方そのものを覚えさせます。このとき使うのは、人間が正解の印をつけていない、ネット上にいくらでも転がっているふつうの文章です。
+  ここでいう「正解の印」とは、たとえば「この文章はポジティブな感想です」「この文の正しい翻訳はこれです」といった、人間があらかじめ付けた目印のこと。
+  ラベル付きデータを大量に用意するのはとても手間がかかりますが、事前学習ならその手間を省けるのが大きな利点です。
+  <a class="ref" href="#src-s1-01" data-level="3">s1-01</a>
+  <a class="ref" href="#src-s1-02" data-level="4">s1-02</a>
+  <a class="ref" href="#src-s1-03" data-level="3">s1-03</a>
+</p>
+<p>
+  次に第二段階です。その土台を使って、翻訳や要約といった個別のタスク向けに、少しだけ追加学習をします。
+  このとき初めて、人間が用意したお手本データを使います。この追加学習のことを、ファインチューニング（fine-tuning）といいます。
+  <a class="ref" href="#src-s1-01" data-level="3">s1-01</a>
+  <a class="ref" href="#src-s1-02" data-level="4">s1-02</a>
+  <a class="ref" href="#src-s1-03" data-level="3">s1-03</a>
+</p>
+<p>
+  ファインチューニングという言葉は難しそうに見えますが、やっていることは「もう日本語をだいたい知っている人に、履歴書の書き方だけ追加で教える」のに近いです。
+  ゼロから日本語を教え直すのではなく、すでに持っている一般的な知識を土台にして、特定の課題に合わせて微調整するわけですね。
+</p>
+<p>
+  ここで重要なのは、最初から全部を教え込む必要がなくなるということです。事前学習があるおかげで、個別タスクに必要な教師データはずっと少なくてすみますし、
+  モデルの振る舞いにも一種の汎用性が生まれます。
+</p>
+<p>
+  この見方から振り返ると、2018年はいまの LLM の原型が一気に揃った年でした。ただ、当時はまだ LLM（Large Language Model、大規模言語モデル）
+  という呼び方は一般的ではありません。研究者たちは PTM（Pre-trained Model）や language representation model といった名前をよく使っていました。
+  ですが後から見ると、この時期に起きていたのは、後の LLM の原型である「ひとつの基盤モデルを、たくさんのタスクに使い回す」という今では当たり前のことの芽生えだったのです。
+  <a class="ref" href="#src-s1-04" data-level="3">s1-04</a>
+  <a class="ref" href="#src-s1-05" data-level="3">s1-05</a>
+</p>
+
+<h3>1-1. GPT-1 と BERT ── 事前学習モデルの登場</h3>
+<p>
+  2018年には、いまの LLM の直接の祖先となるモデルが相次いで現れます。同じ年に類似の発想が複数同時に登場したこと自体が、
+  事前学習という考え方が成熟していたことを物語っています。その背景には、2017年に発表された Transformer というアーキテクチャの存在がありました。
+  技術的にどういうものかはコラム「なぜ 2018 年に事前学習モデルが花開いたのか」で詳しく触れますが、ここではひとまず、
+  それ以前の技術の限界を大きく乗り越え、巨大なテキストを効率よく学習できる仕組みが生まれた、とだけ知っておけば十分です。
+  <a class="ref" href="#src-s1-01" data-level="3">s1-01</a>
+  <a class="ref" href="#src-s1-02" data-level="4">s1-02</a>
+  <a class="ref" href="#src-s1-03" data-level="3">s1-03</a>
+  <a class="ref" href="#src-s1-06" data-level="4">s1-06</a>
+  <a class="ref" href="#src-s1-07" data-level="4">s1-07</a>
+</p>
+<p>中でも後の歴史を強く形づくったのが、GPT-1 と BERT の二つでした。</p>
+<p>
+  GPT-1 は、OpenAI が発表した <em>Improving Language Understanding by Generative Pre-Training</em> に登場します。ここで初めて GPT という、
+  いまでは誰もが知る名前が現れました。主張はかなり野心的で、大量のテキストで「次の単語を予測する」ように学習した生成型の言語モデルを、
+  最小限の変更だけで複数の自然言語理解タスクに転用できる、というものです。OpenAI はこれを task-agnostic model として打ち出しました。
+  <a class="ref" href="#src-s1-03" data-level="3">s1-03</a>
+</p>
+<p>
+  一方の BERT は、Google が 2018年後半に発表しました。GPT-1 が文章を左から右へ一方向に読むのに対し、BERT は左右両方の文脈を同時に見る双方向の事前学習を採用しました。
+  この違いによって、BERT は当時の複数の自然言語ベンチマークで新記録を叩き出し、「事前学習→微調整」のパイプラインを一気に標準化したのです。
+  論文には「追加の出力層を一つ付けるだけで、幅広い課題に対応できる」とはっきり書かれています。
+  <a class="ref" href="#src-s1-02" data-level="4">s1-02</a>
+</p>
+<p class="fn">注: ベンチマークの詳細は次節「何をもって『すごい』と言っていたのか」で扱います。</p>
+<p>
+  GPT-1 と BERT は設計思想こそ異なりますが、根底にある発想は共通しています。ラベル付きデータの少なさを、ラベルなしテキストの量で補うこと。
+  人間が一つひとつ「これは要約」「これは翻訳」と札を貼らなくても、世の中に膨大にある文章からことばの統計的な癖を吸い上げれば、あとでたくさんの仕事に転用できる。
+  ここに、現在の LLM 時代の最初の地盤があります。
+</p>
+
+<details class="column-box">
+  <summary>2018年に登場したその他の重要なモデル</summary>
+  <div class="column-body">
+    <p>
+      GPT-1 と BERT 以外にも、同時期にはいくつかの重要な研究がありました。
+    </p>
+    <p>
+      ULMFiT: fast.ai の Jeremy Howard と Sebastian Ruder が発表した手法で、「言語モデルをまず作り、その後で文書分類に転用する」という転移学習の考え方を NLP にかなり明瞭な形で持ち込みました。
+      少量のラベル付きデータしかなくても大きな効果が出ることを示し、研究コミュニティに強い印象を残しています。
+      <a class="ref" href="#src-s1-01" data-level="3">s1-01</a>
+    </p>
+    <p>
+      ELMo: Allen Institute for AI などの研究チームが発表しました。大きなポイントは、単語の意味を固定ではなく文脈の中で変わるものとして扱ったことです。
+      たとえば英単語の "right" は「正しい」かもしれないし「右」かもしれない。従来のモデルではこうした区別が困難でしたが、ELMo は前後の文脈から単語表現を作ることでこの曖昧さに対処しました。
+      <a class="ref" href="#src-s1-06" data-level="4">s1-06</a>
+    </p>
+    <p class="fn">注: 技術的には、単語埋め込みで異なる意味が同じベクトルに押し込められることで起きる問題です。</p>
+    <p>
+      興味深いのは、ULMFiT も ELMo も Transformer ベースではなく、それ以前の LSTM 系の技術を使っていたことです。つまり、2018年はまだ「Transformer がすべてを支配した年」ではありませんでした。
+      「文脈を持った事前学習モデルが有効だ」という直観のほうが先に広まり、その後に Transformer ベースのアプローチが主流になっていった、という順番だったのです。
+      <a class="ref" href="#src-s1-06" data-level="4">s1-06</a>
+      <a class="ref" href="#src-s1-07" data-level="4">s1-07</a>
+    </p>
+  </div>
+</details>
+
+<h3>1-2. 何をもって「すごい」と言っていたのか</h3>
+<p>さて、当時の研究者たちは、新しく登場した事前学習モデルの性能を、どうやって比べていたのでしょうか。</p>
+<p>
+  ここで登場するのが、ベンチマークと呼ばれる標準テストです。ちょっと乱暴に言えば AI 用の全国模試のようなもので、同じ問題をいろいろなモデルに同じ枠組みで解かせ、スコアを比べます。
+  <a class="ref" href="#src-s1-08" data-level="4">s1-08</a>
+  <a class="ref" href="#src-s1-09" data-level="3">s1-09</a>
+</p>
+<p>
+  2018年前後の自然言語処理で最も代表的だったのが、GLUE と呼ばれるベンチマーク群です。GLUE は単一のテストではなく、文の文法的正しさの判定、
+  二つの文の意味関係の推論、言い換えの検出など、異なる種類の問題がひとまとめにされた総合テストでした。
+  <a class="ref" href="#src-s1-08" data-level="4">s1-08</a>
+</p>
+<p>
+  GLUE が測りたかったのは、特定のひとつの問題をうまく解く力ではなく、モデルが「言語の一般的な理解力」を土台として持っているかどうかです。
+  「このモデルは、教えられていない新しい課題にもそこそこ適応できるか？」という、事前学習モデルの汎用性を測るための物差しでした。
+  <a class="ref" href="#src-s1-08" data-level="4">s1-08</a>
+</p>
+<p>
+  また、GLUE とは別の軸として、翻訳ベンチマークも主要な評価基準でした。ひとつの言語を別の言語に変えるには、語彙だけでなく語順や意味、文脈の保持が必要になります。
+  しかも大量の対訳データがあるので性能比較がしやすい。新しいアーキテクチャが出ると、まず翻訳で試されることが多かったのは、そのためです。
+  先述の Transformer 論文が衝撃を与えたのも、まず機械翻訳で強い結果を出したことが大きなきっかけでした。
+  <a class="ref" href="#src-s1-07" data-level="4">s1-07</a>
+</p>
+<p>
+  ここで押さえておきたいのは、当時の自然言語処理がまだかなり研究室の言葉で回っていた、ということです。研究者たちは GLUE の点数で熱狂していましたが、
+  一般の人がそれを見て「生活が変わる」と感じる段階ではまだありませんでした。つまり、2018年から2020年前半までの LLM 史は、まず研究コミュニティの内部革命として始まったのです。
+</p>
+
+<details class="column-box">
+  <summary>GLUE の中身をもう少し詳しく</summary>
+  <div class="column-body">
+    <p>GLUE にはいくつかのサブタスクがあります。</p>
+    <p>
+      たとえば CoLA は、提示された英文が文法的に正しいかどうかを判定するテストです。単純に聞こえますが、モデルが「正しい文章」をどれくらい理解しているかをある程度測ることができます。
+      <a class="ref" href="#src-s1-26" data-level="3">s1-26</a>
+    </p>
+    <p>
+      RTE は、二つの文があったとき、片方がもう片方を含意するか、矛盾するか、どちらでもないかを判定するものです。ことばの表面的な一致ではなく、意味の関係を問うのがポイントです。
+      2019年の調査論文でも、こうした含意関係の認識は「より深い言語理解を測る試み」として位置づけられています。
+      <a class="ref" href="#src-s1-09" data-level="3">s1-09</a>
+    </p>
+    <p>
+      これらのサブタスクを束ねて総合スコアを出すところに、GLUE の設計思想が表れています。「ひとつの得意分野だけ強いモデル」ではなく、
+      「複数の異なる能力をまんべんなく持つモデル」を評価したかったのです。
+    </p>
+  </div>
+</details>
+
+<button class="inline-demo-button" type="button" disabled>GLUE の一部である CoLA を実際にプレイしてみる（準備中）</button>
+
+<h3>1-3. 2019年、GPT-2 が見せた「文章を延々と書く機械」</h3>
+<p>
+  2018年に土台ができたあと、次の転機は 2019年の GPT-2 でした。OpenAI は GPT-2 を 1.5B、つまり15億パラメータのモデルとして発表します。
+</p>
+<p>
+  ここでいうパラメータは、モデルの内部にある「調整つまみ」の数だと思ってください。つまみが多いほど、より複雑な規則やパターンを覚えられる可能性があります。
+  ただし、その分だけ訓練には大量のデータと計算資源が必要になります。
+  <a class="ref" href="#src-s1-11" data-level="3">s1-11</a>
+  <a class="ref" href="#src-s1-12" data-level="3">s1-12</a>
+</p>
+
+<figure class="article-figure">
+  <svg viewBox="0 0 720 380" role="img" aria-labelledby="scene1-fig1-title scene1-fig1-desc">
+    <title id="scene1-fig1-title">GPT-2 の多数のパラメータをつまみに見立てた模式図</title>
+    <desc id="scene1-fig1-desc">Transformer のブロックを模した格子の中に多数のノブと接続線を配置し、調整つまみの多さを表現する図。</desc>
+    <defs>
+      <linearGradient id="scene1-grid" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#fffaf1" />
+        <stop offset="100%" stop-color="#efe6d5" />
+      </linearGradient>
+      <linearGradient id="scene1-accent" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#2b6a4a" />
+        <stop offset="100%" stop-color="#bba67d" />
+      </linearGradient>
+    </defs>
+    <rect x="18" y="18" width="684" height="344" rx="24" fill="url(#scene1-grid)" stroke="rgba(23,21,18,0.12)" />
+    <text x="42" y="58" fill="#4d5652" font-size="24" font-family="Manrope, sans-serif">parameter knobs inside a Transformer</text>
+    <g stroke="rgba(23,21,18,0.1)" stroke-width="2">
+      <path d="M82 112 H640" />
+      <path d="M82 188 H640" />
+      <path d="M82 264 H640" />
+    </g>
+    <g fill="none" stroke="url(#scene1-accent)" stroke-width="4">
+      <rect x="82" y="88" width="118" height="52" rx="14" />
+      <rect x="228" y="88" width="118" height="52" rx="14" />
+      <rect x="374" y="88" width="118" height="52" rx="14" />
+      <rect x="520" y="88" width="118" height="52" rx="14" />
+      <rect x="120" y="164" width="118" height="52" rx="14" />
+      <rect x="266" y="164" width="118" height="52" rx="14" />
+      <rect x="412" y="164" width="118" height="52" rx="14" />
+      <rect x="158" y="240" width="118" height="52" rx="14" />
+      <rect x="304" y="240" width="118" height="52" rx="14" />
+      <rect x="450" y="240" width="118" height="52" rx="14" />
+    </g>
+    <g fill="#2b6a4a">
+      <circle cx="141" cy="114" r="12" />
+      <circle cx="287" cy="114" r="12" />
+      <circle cx="433" cy="114" r="12" />
+      <circle cx="579" cy="114" r="12" />
+      <circle cx="179" cy="190" r="12" />
+      <circle cx="325" cy="190" r="12" />
+      <circle cx="471" cy="190" r="12" />
+      <circle cx="217" cy="266" r="12" />
+      <circle cx="363" cy="266" r="12" />
+      <circle cx="509" cy="266" r="12" />
+    </g>
+    <g fill="#605c54" font-size="18" font-family="IBM Plex Mono, monospace">
+      <text x="95" y="330">1.5B parameters</text>
+      <text x="298" y="330">more knobs</text>
+      <text x="474" y="330">more patterns</text>
+    </g>
+  </svg>
+  <figcaption>GPT-2 の「15億個の調整つまみ」を、Transformer ブロックの中に散らばるノブとして描いた仮図です。</figcaption>
+</figure>
+
+<p>GPT-2 には、二つの意味で驚きがありました。</p>
+<p>
+  第一に、ただ文章の続きを書かせるだけで、かなりそれらしい長文が出てくること。OpenAI が公開したサンプルは、数段落にわたってニュース記事や作文のような文章を生成できました。
+  いまの水準から見れば粗いですが、それでも当時は、機械がここまで「もっともらしい」まとまりを作れること自体が衝撃でした。
+  <a class="ref" href="#src-s1-11" data-level="3">s1-11</a>
+  <a class="ref" href="#src-s1-13" data-level="3">s1-13</a>
+</p>
+<p>
+  第二に、GPT-2 が追加学習なし（ゼロショット）に近い形で複数のタスクに手を伸ばし始めたことです。OpenAI の論文は、巨大な言語モデルが質問応答や要約のような仕事を、
+  追加学習なしでもある程度こなせると示しました。ここではまだ GPT-3 のような鮮やかな few-shot 学習には到達していませんが、
+  「大きくした言語モデルは、文章の続きを書くだけの装置ではないのでは？」という感覚が生まれ始めます。
+  <a class="ref" href="#src-s1-11" data-level="3">s1-11</a>
+</p>
+
+<details class="column-box">
+  <summary><span id="column-zero-shot-and-few-shot">zero-shot / few-shot って何？</span></summary>
+  <div class="column-body">
+    <p>
+      zero-shot は、見本をひとつも見せないやり方です。たとえば…
+    </p>
+    <p>
+        「次の英文を日本語に訳してください: I love this city.」
+    </p>
+    <p>とだけ言って、そのまま訳させるようなケースです。</p>
+    <p>
+      一方 few-shot は、少数の見本を先に見せてから答えさせる方法です。たとえば…
+    </p>
+    <p>
+        「次の単語を日本語に訳してください: 
+      dog → 犬、cat → 猫、apple → りんご、city → ? のように例を並べると、
+      モデルは「これは英単語を日本語に訳す問題なんだな」と文脈から推測しやすくなります。
+    </p>
+    <p>
+      つまり zero-shot や few-shot という言葉は、「わざわざ再訓練しなくても、その場の指示や見本だけである程度対応できるかもしれない」という変化を表すキーワードです。
+    </p>
+  </div>
+</details>
+
+<figure class="article-figure">
+  <svg viewBox="0 0 720 320" role="img" aria-labelledby="scene1-fig2-title scene1-fig2-desc">
+    <title id="scene1-fig2-title">GPT-2 がテキストを伸ばしていく様子の模式図</title>
+    <desc id="scene1-fig2-desc">左に短いプロンプト、右に長く伸びる生成テキストの帯を配置し、続き生成の感覚を表す図。</desc>
+    <rect x="16" y="16" width="688" height="288" rx="24" fill="#fffaf1" stroke="rgba(23,21,18,0.12)" />
+    <text x="44" y="54" fill="#4d5652" font-size="22" font-family="Manrope, sans-serif">prompt → continuation</text>
+    <rect x="44" y="88" width="164" height="152" rx="16" fill="#2b6a4a" opacity="0.14" />
+    <text x="68" y="132" fill="#2b6a4a" font-size="21" font-family="IBM Plex Mono, monospace">PROMPT</text>
+    <text x="68" y="168" fill="#171512" font-size="18" font-family="Manrope, sans-serif">In a shocking</text>
+    <text x="68" y="194" fill="#171512" font-size="18" font-family="Manrope, sans-serif">finding, scientists...</text>
+    <path d="M238 164 H306" stroke="#bba67d" stroke-width="6" stroke-linecap="round" />
+    <path d="M292 148 L316 164 L292 180" fill="none" stroke="#bba67d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <rect x="330" y="72" width="330" height="184" rx="18" fill="#f0eadf" />
+    <g fill="#605c54" font-size="16" font-family="IBM Plex Mono, monospace">
+      <text x="356" y="114">generated text stream</text>
+    </g>
+    <g fill="#171512" font-size="17" font-family="Manrope, sans-serif">
+      <text x="356" y="146">...discovered a herd of unicorns living in</text>
+      <text x="356" y="174">a remote valley, speaking a language that</text>
+      <text x="356" y="202">looked structured enough to feel like prose.</text>
+      <text x="356" y="230">The article kept going, paragraph after paragraph.</text>
+    </g>
+  </svg>
+  <figcaption>短いプロンプトからもっともらしい段落が連なっていく、GPT-2 時代の驚きをそのまま見せるための仮図です。</figcaption>
+</figure>
+
+<p>
+  ところで、OpenAI は GPT-2 の完全版モデルをすぐには公開しませんでした。「悪用の懸念」を理由に、まず小さいバージョンだけを先に出し、
+  大きいバージョンは後から段階的に公開するという staged release を採ったのです。この判断はかなり話題になって、称賛も批判も浴びました。
+  <a class="ref" href="#src-s1-13" data-level="3">s1-13</a>
+  <a class="ref" href="#src-s1-14" data-level="3">s1-14</a>
+</p>
+<p>
+  後から見ると、これは単に GPT-2 の安全性の話にとどまりません。強力な生成モデルをどこまで公開するかという、その後ずっと続く論点が、この時点ですでに始まっていたんですね。
+</p>
+
+<details class="column-box">
+  <summary>コラム: なぜ 2018 年に「事前学習モデル」が花開いたのか</summary>
+  <div class="column-body">
+    <p>
+      ここまで読んで、「なぜ急に 2018 年ごろから、こんなに流れが変わったんだろう？」と感じた方もいるかもしれません。答えはひとつではありませんが、少なくとも三つの流れが重なっていました。
+    </p>
+    <p>
+      ひとつ目は、RNN の限界が見えていたことです。RNN は文章を一語ずつ順番に読んでいく仕組みで、系列データを扱えるので長いあいだ自然言語処理の主役でした。
+      しかし、一語ずつ順番に処理する都合上、並列化しにくいという欠点がありました。
+    </p>
+    <p>
+      ふたつ目は、attention の登場です。attention は「いまこの単語を処理するとき、過去のどの単語をどれだけ見るべきか」を柔軟に決める仕組みです。
+      2017年の <em>Attention Is All You Need</em> は、さらに一歩先へ進みました。
+      <a class="ref" href="#src-s1-07" data-level="4">s1-07</a>
+    </p>
+    <p>
+      この論文が提案した Transformer は、思い切って RNN や CNN を捨て、attention だけで系列変換を行う構造を採りました。その結果、長い文の中の遠い関係を扱いやすくなり、
+      しかも GPU で並列計算しやすくなったんです。現在の GPT、BERT、Claude、Gemini のようなモデル群は、この流れの上にあります。
+      <a class="ref" href="#src-s1-07" data-level="4">s1-07</a>
+    </p>
+    <p>
+      三つ目は、ウェブ上に使えるテキストが膨大にあったことです。事前学習はラベル付きデータを大量には必要としません。文章そのものが山ほどあればいい。
+      次の単語を当てさせる、ある単語を穴埋めさせる、といった自己教師ありの課題なら、ラベルは文章の中から自動的に作れます。
+      <a class="ref" href="#src-s1-02" data-level="4">s1-02</a>
+      <a class="ref" href="#src-s1-03" data-level="3">s1-03</a>
+      <a class="ref" href="#src-s1-05" data-level="3">s1-05</a>
+    </p>
+    <p>
+      ここで面白いのは、2018年が完全に Transformer の独壇場ではなかったことです。先ほど見た ELMo は双方向 LSTM ベースで、しかも強い成果を出しました。
+      当時の本質は「Transformer だから勝った」というより、文脈をもった事前学習表現を先に作ると下流タスクで強い、という発見が研究コミュニティに共有されたことでした。
+      <a class="ref" href="#src-s1-06" data-level="4">s1-06</a>
+      <a class="ref" href="#src-s1-07" data-level="4">s1-07</a>
+    </p>
+  </div>
+</details>
+
+<h3>1-4. AI Dungeon ── 最初期の「LLM 体験」</h3>
+<p>
+  一般の人が GPT-2 的なものに触れられた最初期の例として、よく挙がるのが AI Dungeon です。これは文章だけで遊ぶテキストアドベンチャーゲームで、
+  プレイヤーが「剣を抜く」「王に話しかける」といった行動を入力すると、AI がその先の物語を即興で続けてくれます。2019年末に大きく話題になった AI Dungeon 2 は、
+  GPT-2 の 1.5B モデルを使って作られていました。
+  <a class="ref" href="#src-s1-15" data-level="1">s1-15</a>
+</p>
+<p>
+  当時これが新鮮だったのは、AI が「決まった選択肢を返すだけのボット」ではなく、その場で文章世界を創造してくれる相手に見えたからです。
+  プレイヤーが予想外の行動を入力しても、ゲームは止まらず、とにかく何か続きを書いてくれる。すると人間の側は、その雑な返事の中から整合的な物語を読み取ってしまうんですね。
+</p>
+<details class="column-box">
+  <summary>AI Dungeon のプレイ動画を見てみる</summary>
+  <div class="column-body">
+    <p>
+      2019年当時の AI Dungeon を実際にプレイしている様子を見てみましょう。日本人 YouTuber の実況動画があるので、こちらを紹介します。
+    </p>
+    <blockquote>
+  <p>日本人 YouTuber による 2019年当時の AI Dungeon の実況動画</p>
+  <iframe
+    src="https://www.youtube-nocookie.com/embed/c1chw3CaXoE?si=xdA0hXPkGkzGD0v9&amp;start=90"
+    title="AI Dungeon 2019 playthrough video"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerpolicy="strict-origin-when-cross-origin"
+    allowfullscreen
+  ></iframe>
+</blockquote>
+  </div>
+</details>
+
+
+<p>
+  ただし、AI Dungeon は同時に、当時のモデルの限界も明らかにしました。Hacker News の当時の議論を見ると、面白さを認める声と同時に、
+  「短い局面では驚くほどそれらしいが、物語全体はすぐ壊れる」「世界の整合性が保てない」といった反応も多く見られました。
+  GPT-2 は局所的な次の一文をそれっぽく書くのはうまいけれど、長期的な記憶や世界状態の維持は苦手だったんですね。
+  <a class="ref" href="#src-s1-15" data-level="1">s1-15</a>
+  <a class="ref" href="#src-s1-16" data-level="1">s1-16</a>
+</p>
+<p>AI Dungeon にはもうひとつ、重要な教訓がありました。使うのが高かったんです。</p>
+<p>
+  2020年前後には、いまのように「月額いくらで高性能な会話 AI を使う」時代はまだ始まっていません。API も整っておらず、一般の開発者が巨大言語モデルを自分のサービスに組み込みたければ、
+  モデルの重みを手に入れ、クラウド上で GPU を借り、自前で動かす必要がありました。
+</p>
+<p>
+  少し用語を整理しておきましょう。GPU は画像処理向けに発達した演算装置ですが、行列計算を大量にさばけるため、深層学習の訓練と推論に不可欠になりました。
+  クラウドで GPU を借りるというのは、Amazon Web Services や Google Cloud のような計算機を時間貸しで使うことです。
+  <a class="ref" href="#src-s1-17" data-level="2">s1-17</a>
+</p>
+<p>
+  AI Dungeon の制作者である Nick Walton は、2019年12月8日に「今は1日あたり1万ドル以上かかっている」「昨日のサイトへの訪問者数は6万人ぐらいだった」と述べました。
+  あくまでも開発者自身の投稿ですが、少なくとも、コストが高く持続可能性が怪しいという空気が強くあったことは伝わってきます。
+  <a class="ref" href="#src-s1-16-1" data-level="1">s1-16-1</a>
+  <a class="ref" href="#src-s1-16-2" data-level="1">s1-16-2</a>
+</p>
+<p>
+  ここには、のちの API 化が持つ意味がすでに凝縮されています。つまり、2019年の時点では LLM は「遊んでみると未来を感じる」けど、「広く商品に組み込むには重すぎる」技術だったのです。
+  <a class="ref" href="#src-s1-16" data-level="1">s1-16</a>
+</p>
+
+<details class="column-box">
+  <summary>コラム: 全てをテキストに / T5</summary>
+  <div class="column-body">
+    <p>
+      2019年にはもうひとつ、重要な研究がありました。Google の T5 です。正式名称は <em>Text-To-Text Transfer Transformer</em>。
+      この名前が示すとおり、T5 の核心は、翻訳も要約も分類も質問応答も、全部「テキストを入力してテキストを出す」問題として統一してしまうことにありました。
+      <a class="ref" href="#src-s1-18" data-level="3">s1-18</a>
+    </p>
+    <p>
+      たとえば、感情分析なら「sentiment: この映画は最高だった」という入力に対して「positive」と出す。翻訳なら「translate English to German: ...」と書いて、
+      ドイツ語を出させる。こうすれば、ひとつの枠組みで多様なタスクを扱えます。
+    </p>
+    <p>
+      T5 は単なる大きなモデルではなく、「事前学習モデルをどう使えば汎用的な土台になるか」をかなり体系的に整理した論文でした。この text-to-text という視点は、その後の LLM の発展にも深く残ります。
+    </p>
+  </div>
+</details>
+
+<h3>1-5. GPT-3: 稀代の説得材料</h3>
+<p>2020年に入ると、流れはさらに加速します。</p>
+<p>
+  まず年初に OpenAI の研究者たちが発表したのが、スケーリング則の論文でした。内容を大雑把に言えば、言語モデルの性能は、モデルサイズ・データ量・計算量を増やしていくと、
+  かなりきれいな法則性に従って改善する、という経験則です。
+  <a class="ref" href="#src-s1-12" data-level="3">s1-12</a>
+</p>
+<p>
+  これは単なる学術的知見ではありませんでした。研究者や投資家にとっては、「性能向上は職人芸だけではなく、計算資源の投入によってある程度見通せるものかもしれない」という感覚を与えたからです。
+</p>
+<p>ここから先、LLM の歴史は、研究の歴史であると同時に、資本投入の歴史にもなっていきます。</p>
+<p>
+  その直後に現れたのが GPT-3 でした。2020年の論文 <em>Language Models are Few-Shot Learners</em> で、OpenAI は 1750億パラメータの巨大言語モデルを発表しました。
+  これは当時の非スパース型言語モデルとしては桁違いに大きく、OpenAI 自身が「それまでの最大級モデルの 10 倍」と説明しています。
+  <a class="ref" href="#src-s1-19" data-level="3">s1-19</a>
+</p>
+<p>
+  GPT-3 が衝撃的だったのは、単に規模が大きかったからではありません。先述の <a href="#column-zero-shot-and-few-shot">few-shot learning</a> が、それまでのモデルよりも明らかにうまく、
+  いくつか例を与えるだけで未知のタスクにもかなり対応できるように見えたからです。ここで初めて、「新しい仕事ごとに専用データを集めて再訓練しなくても、まずは指示文や少数の例だけで、
+  かなりのところまでやれるのではないか」という期待が強く現実味を帯びました。
+</p>
+<p>
+  もちろん、実際には精度や安定性の問題があり、この期待がそのまま現実になったわけではありません。それでも GPT-3 は、「モデルを大きくすることには意味がある」
+  「しかもその意味は、研究ベンチマークの点数以上に、使い方そのものを変えるかもしれない」という感覚を広く共有させました。
+</p>
+<p>
+  興味深いのは、GPT-3 が「量の変化なのに、質の変化に見えた」ことです。この感覚は後に emergent abilities という言葉で整理されますが、
+  2023年には「急に現れたように見えるだけかもしれない」という反論も出ています。
+  <a class="ref" href="#src-s1-20" data-level="3">s1-20</a>
+  <a class="ref" href="#src-s1-21" data-level="3">s1-21</a>
+</p>
+<p>
+  ここで大事なのは、決着の有無ではなく、GPT-3 が「モデルを大きくすること自体に意味がある」という説に強い説得力を与えた存在だったこと。それがこの先の物語を大きく動かしていきます。
+</p>
+
+<h3>1-6. この時期の経済的風景: 研究は熱かったが、市場はまだほとんど気づいていなかった</h3>
+<p>
+  2018年から2020年前半までを一言でまとめるなら、研究は熱かったけれど、市場はまだ冷たかった、そんな時期です。
+</p>
+<p>
+  象徴的なのが、2019年7月の Microsoft による OpenAI への 10億ドル投資でした。いまから見れば歴史の大事件ですが、当時はまだ一般社会に強い衝撃を与えるニュースではありませんでした。
+  逆に言えば、この投資は世間が十分に騒ぐ前から、計算資源競争の重要性を一部のプレイヤーが理解していたことを示しています。
+  <a class="ref" href="#src-s1-22" data-level="3">s1-22</a>
+</p>
+<p>
+  一方、実用化で最も大きかった事例のひとつは、チャットではなく Google 検索への BERT 導入でした。Google は 2019年10月、BERT によって検索理解が「過去5年で最大、検索史の中でも最大級の改善」になると述べ、
+  米国英語検索の 10件に1件でランキング改善に役立つと説明しています。
+  <a class="ref" href="#src-s1-23" data-level="3">s1-23</a>
+</p>
+<p>
+  これは、事前学習モデルが一般消費者向けの巨大サービスの裏側で、すでに目に見える経済価値を生んでいた例です。面白いのは、その価値がユーザーには「BERT を使っています」とは見えにくいこと。
+</p>
+<p>
+  この時期の収益源を考えると、主戦場は派手な open-domain chat ではありませんでした。検索ランキング、テキスト分類、要約補助、翻訳支援といった、
+  人間の作業の裏側を少し賢くする用途が中心だったんです。
+</p>
+<p>
+  Google の Meena のように会話そのものを研究するプロジェクトはありましたし、対話品質を測る新しい指標も提案されていました。しかし Meena 自体は研究段階にとどまります。
+  理由はシンプルで、会話は面白いけれど、品質管理も安全性も難しく、何より「うまくいったときの価値」と「壊れたときのリスク」の差が大きかったからです。
+  Forrester の 2019年レポートも、顧客対応向け conversational AI は「流行だが失望も大きい」と評しています。
+  <a class="ref" href="#src-s1-24" data-level="3">s1-24</a>
+  <a class="ref" href="#src-s1-25" data-level="2">s1-25</a>
+</p>
+<div class="bottleneck-block">
+  <p>
+    <strong>この時期のボトルネック:</strong> 汎用化できる学習の形そのものは見つかったものの、それを使いこなせるのは巨大 GPU クラスタを回せるごく一部の組織だけでした。
+    LLM はまだ「未来の匂い」を放っていましたが、製品の部品として広く流通する技術にはなっていなかったのです。
+  </p>
+</div>
+<p>
+  そして、次のセクションで起きる変化はまさにそこを突きます。モデルそのものが急に万能になったからではありません。アクセスの形が変わったからです。論文の成果が、API という「製品」として市場に放たれます。
 </p>

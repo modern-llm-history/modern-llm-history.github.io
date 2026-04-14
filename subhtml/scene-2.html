@@ -1,16 +1,389 @@
 <time>2020-06 – 2022-10</time>
-<h2>スケーリングと商品化</h2>
+<h2>APIとスケーリング</h2>
+<p class="epigraph">巨大言語モデルは、論文の中の存在から、お金を払って借りられるインフラへと変わった。</p>
 <p>
-  GPT-3以後、汎用モデルは論文の中だけの存在ではなくなり、API として商品化され始めます。
-  「何でもそこそこできるモデル」を各社が外部に提供し、要約、分類、チャットボット、ゲームなど、
-  失敗コストの低いユースケースから実装が広がっていきました。
+  これはとても大きな変化でした。どれだけすごいモデルがあっても、それを動かせるのが OpenAI や Google や DeepMind のような一部の巨大組織だけなら、社会への影響は限定的です。
+  けれど、そのモデルをインターネット越しに呼び出せるようにし、「入力した文字列に対して、出力文字列が返ってくる」という形で外部に提供すれば、事情はがらりと変わります。
 </p>
 <p>
-  同時にこの時期は、スケーリング則が研究アジェンダの中心に座った時期でもあります。
-  Chinchilla によって compute 最適なスケールの考え方が整理され、
-  Gopher や PaLM など、大規模モデルの系譜は「どこまで伸ばせるか」をかなり工学的に詰める段階へ入ります。
+  モデルを自前で訓練しなくても、運用基盤を持たなくても、その能力の一部を自社製品の中に埋め込めるようになる。ここに、API 化の意味があります。
 </p>
 <p>
-  研究の中心は依然として pretraining ですが、その成果物はもう研究室の中だけに留まらず、
-  API 経由で外部プロダクトへ流れ込み始めていました。
+  同時に研究の現場では、「どこまで大きくすればよいのか」という問いが、より洗練された形で問われ始めます。パラメータ数を増やす競争は 2021年にかけてさらに激しくなりますが、
+  2022年の Chinchilla が、その競争にひとつの明快な答えを与えることになります。より正確には、「大きくすればよい」のではなく、「大きくするにも最適な比率がある」という答えです。
+</p>
+<p>
+  この時期は、のちに ChatGPT が社会を飲み込むための、技術と市場の準備期間でした。GPT-3 はすでに存在していました。でも GPT-3 単体では、まだ社会現象にはなりませんでした。
+  社会現象になるには、使い方の設計が必要だったんです。
+</p>
+
+<h3>2-1. API が市場を作った</h3>
+<p>
+  2020年6月、OpenAI は OpenAI API の提供を発表しました。公式の説明はシンプルで、「OpenAI が開発した新しい AI モデルにアクセスするための API を公開する。これは特定用途向けではなく、
+  一般的な text in, text out のインターフェースであり、さまざまな英語タスクを試せる」というものです。
+  <a class="ref" href="#src-s2-01" data-level="3">s2-01</a>
+</p>
+<p>
+  API とは、ソフトウェアの機能を外部から呼び出すための窓口のことです。もう少しくだけた言い方をすると、遠隔地にある賢い機械への注文票のようなものです。
+  開発者は自分のプログラムから API に文章を送り、返ってきた文章を自分のアプリに組み込みます。モデル本体は OpenAI 側のサーバーで動いているので、利用者は訓練や推論リソースを自分で持たなくてよいわけです。
+</p>
+<p>
+  クラウドの電気を使うように、知能を外部サービスとして借りる。そんなイメージです。
+</p>
+<p>
+  この変化がどれほど大きいかは、逆に「それ以前は何が必要だったか」を考えるとよくわかります。巨大言語モデルを自前で使おうとすれば、少なくともモデルの重み、推論サーバー、運用上の手間が必要でした。
+  API は、これらの手間の大部分を OpenAI 側に肩代わりさせてくれます。
+</p>
+<p>
+  2020年の OpenAI API ページには、OpenAI の内部チームでさえ API を使うことで「分散システムの問題より機械学習研究に集中できる」と書かれています。
+  これは、API が単に外部販売の窓口だっただけでなく、巨大モデルの扱いを抽象化するソフトウェア的レイヤーだったことを示しています。
+  <a class="ref" href="#src-s2-01" data-level="3">s2-01</a>
+</p>
+<p>
+  この時点で、後の歴史にとって重要な流れが始まっています。それは pretraining → API → chat UI → chat UI + tool → agent というアクセス形態の変化の、最初の大きな曲がり角でした。
+</p>
+
+<h3>2-2. 「AI 文章作成ツール」ブーム</h3>
+<p>
+  API の意味は、研究者よりも先に、むしろスタートアップ界隈が敏感に嗅ぎ取りました。
+</p>
+<p>
+  2021年前後に増えたのが、文章生成支援ツールです。たとえば Copy.ai は、広告文やマーケティング文面の生成を助けるツールとして初期の注目を集め、2021年には資金調達を発表しています。
+  Jasper AI や Writesonic、HyperWrite なども、同じ大きな波に乗っていました。
+  <a class="ref" href="#src-s2-02" data-level="2">s2-02</a>
+  <a class="ref" href="#src-s2-03" data-level="2">s2-03</a>
+</p>
+<p>
+  では、なぜ最初の市場がこの領域だったのでしょうか。理由はかなり単純です。文章生成は誤りに比較的寛容で、入力と出力の形式がどちらもテキストで済み、
+  しかも「営業メールを早く書けます」「広告の見出しを十案出せます」といった価値がすぐ説明できたからです。
+</p>
+<p>
+  この時期のスタートアップには、後にしばしば「基盤モデルを薄く包んだだけだ」と批判されるものもありました。確かに技術的な参入障壁は薄かったかもしれません。
+  しかし歴史的には、これらの企業は市場がどこで立ち上がるかを先に試した実験場でした。研究室の成果を製品文脈に翻訳し、「どの程度の品質なら人はお金を払うか」「どんなインターフェースなら使われるか」を確かめたのです。
+</p>
+
+<h3>2-3. 2021年は「パラメータ戦争」の年だった</h3>
+<p>
+  市場の入口が API によって開いた一方で、研究の前線では、より単純で、ある意味わかりやすい競争が続いていました。どこまで大きくできるか、です。
+</p>
+<p>
+  2021年から2022年初頭にかけて、さまざまな巨大言語モデルが相次いで登場します。Google、Baidu、DeepMind、Microsoft と NVIDIA がこぞってパラメータ数を競い、
+  その規模は GPT-3 の 1750億を超えて、ついには 5300億パラメータに達するモデルまで登場しました。
+  <a class="ref" href="#src-s2-04" data-level="3">s2-04</a>
+  <a class="ref" href="#src-s2-05" data-level="3">s2-05</a>
+  <a class="ref" href="#src-s2-06" data-level="3">s2-06</a>
+  <a class="ref" href="#src-s2-07" data-level="3">s2-07</a>
+</p>
+<p>
+  なぜ当時これがあれほど注目されたかというと、パラメータ数が一番わかりやすい指標だったからです。性能の内実を説明するのは難しいですが、「1750億より 5300億のほうが大きい」と言えば、一応の勢いは伝わります。
+</p>
+<p>
+  ただし、ここで早くも限界が見え始めます。Megatron-Turing NLG 530B は当時としては最先端級の性能を示しましたが、人々が感じ取ったのは、「GPT-3 をさらに三倍大きくしたら、三倍すごくなった」という話ではありませんでした。
+  むしろ、「確かに強くはなったけど、コストの増加に見合うほど素直には伸びない」という感触が広がります。
+  <a class="ref" href="#src-s2-07" data-level="3">s2-07</a>
+</p>
+<p>
+  このズレは重要です。GPT-3 の成功によって、スケーリングは一種の勝利の方程式に見えました。けれど、2021年のパラメータ戦争は、「大きくすれば自動的にうまくいく」という単純図式に早くも疑問符をつけたんです。
+</p>
+
+<h3>2-4. Chinchilla 70B: 「ただデカい」から「賢くデカい」へ</h3>
+<p>
+  2022年、DeepMind は Chinchilla という 700億パラメータのモデルを発表します。数字だけ見れば、Gopher 280B の4分の1しかありません。ところが結果は逆でした。
+  Chinchilla は、Gopher と同じ計算予算で訓練されながら、より多くのデータで学習することで、Gopher を上回る性能を示したのです。しかも GPT-3 や Jurassic-1、Megatron-Turing NLG に対しても広い評価範囲で優位でした。
+  <a class="ref" href="#src-s2-08" data-level="3">s2-08</a>
+</p>
+<p>
+  ここで DeepMind が示したのは、後にしばしば Chinchilla 則と呼ばれる考え方です。要するに、計算資源が決まっているなら、モデルの大きさと学習データ量には最適な釣り合いがある、ということです。
+</p>
+<p>
+  それまでの大型モデルの多くは、パラメータが多すぎるわりに、読ませるデータが少なすぎました。つまり「器ばかり大きくて、中身を十分に詰めていない」状態だったんですね。
+  <a class="ref" href="#src-s2-08" data-level="3">s2-08</a>
+</p>
+<p>
+  この洞察は、スケーリング則を否定したわけではありません。むしろ精緻化したと言ったほうが正確です。2020年のスケーリング則は、「量を増やせば性能は予測可能に伸びる」と示しました。
+  2022年の Chinchilla は、それに対して「ただし量の配り方には、かなり明確な最適解がありますよ」と言ったんです。
+</p>
+<p>
+  これは研究コミュニティにとって非常に強い意味を持ちました。GPU 時間は高価で、訓練には月単位の時間がかかります。だから「同じ予算ならどう配るのが一番うまいか」が、そのまま戦略になるわけです。
+</p>
+
+<h3>2-5. 「聞き方」で眠った能力が目を覚ます</h3>
+<p>
+  ここまで見てきたのは、モデルを大きくすることと、データの配り方を賢くすることの話でした。でもこの時期にはもうひとつ、少し違う角度からの重要な発見がありました。
+</p>
+<p>
+  それは、<span class="text-highlight">同じモデルでも、聞き方ひとつで返ってくる答えの質がまるで変わる</span>、という事実です。ここで「聞き方」と言っているのは、モデルに渡す指示文や文脈のことで、これをプロンプトと呼びます。
+</p>
+<p>
+  2022年に発表された Chain-of-Thought Prompting は、算数や常識推論のような問題に対して、いきなり答えを出させるのではなく、途中の考え方の例を見せるだけで正答率が大きく上がることを示しました。
+  <a class="ref" href="#src-s2-19" data-level="3">s2-19</a>
+</p>
+
+<figure class="article-figure">
+  <svg viewBox="0 0 720 332" role="img" aria-labelledby="scene2-fig1-title scene2-fig1-desc">
+    <title id="scene2-fig1-title">Few-shot Chain-of-Thought の例</title>
+    <desc id="scene2-fig1-desc">左に例付きのプロンプト、右に推論ステップと回答を示したカードを並べた図。</desc>
+    <rect x="16" y="16" width="688" height="300" rx="24" fill="#fffaf1" stroke="rgba(23,21,18,0.12)" />
+    <text x="42" y="50" fill="#4d5652" font-size="22" font-family="Manrope, sans-serif">few-shot CoT prompt</text>
+    <rect x="42" y="78" width="286" height="198" rx="18" fill="#f0eadf" />
+    <g fill="#171512" font-size="16" font-family="IBM Plex Mono, monospace">
+      <text x="64" y="112">Q: If 3 bags hold 12 apples,</text>
+      <text x="64" y="136">how many apples are in 5 bags?</text>
+      <text x="64" y="168">A: 3 bags = 12 apples.</text>
+      <text x="64" y="192">One bag = 4 apples.</text>
+      <text x="64" y="216">So 5 bags = 20 apples.</text>
+      <text x="64" y="248">...</text>
+    </g>
+    <path d="M352 164 H410" stroke="#bba67d" stroke-width="6" stroke-linecap="round" />
+    <path d="M396 148 L420 164 L396 180" fill="none" stroke="#bba67d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <rect x="438" y="78" width="224" height="198" rx="18" fill="#2b6a4a" opacity="0.1" />
+    <g fill="#2b6a4a" font-size="17" font-family="IBM Plex Mono, monospace">
+      <text x="462" y="112">reasoning trace</text>
+    </g>
+    <g fill="#171512" font-size="17" font-family="Manrope, sans-serif">
+      <text x="462" y="150">1. Break problem down</text>
+      <text x="462" y="178">2. Solve intermediate step</text>
+      <text x="462" y="206">3. State final answer</text>
+      <text x="462" y="246">Answer: 20</text>
+    </g>
+  </svg>
+  <figcaption>数問の「考え方つき解答」を見せるだけで、同じモデルの推論精度が大きく上がることを示した few-shot CoT のイメージ図です。</figcaption>
+</figure>
+
+<p>
+  さらに同じ年、<em>Large Language Models are Zero-Shot Reasoners</em> は驚くべき結果を報告します。「Let's think step by step」というたった一文をプロンプトの末尾に付け加えるだけで、
+  見本なしのゼロショットでも推論性能が大きく伸びるというのです。
+  <a class="ref" href="#src-s2-20" data-level="3">s2-20</a>
+</p>
+
+<figure class="article-figure">
+  <svg viewBox="0 0 720 308" role="img" aria-labelledby="scene2-fig2-title scene2-fig2-desc">
+    <title id="scene2-fig2-title">Zero-shot Chain-of-Thought の例</title>
+    <desc id="scene2-fig2-desc">通常の質問文の末尾に一文を追加すると、右側の回答に思考手順が現れることを示した図。</desc>
+    <rect x="16" y="16" width="688" height="276" rx="24" fill="#fffaf1" stroke="rgba(23,21,18,0.12)" />
+    <text x="42" y="50" fill="#4d5652" font-size="22" font-family="Manrope, sans-serif">zero-shot CoT trigger</text>
+    <rect x="42" y="88" width="280" height="154" rx="18" fill="#f0eadf" />
+    <g fill="#171512" font-size="17" font-family="Manrope, sans-serif">
+      <text x="62" y="126">Question: A train leaves at 8.</text>
+      <text x="62" y="154">It arrives 3 hours later.</text>
+      <text x="62" y="182">What time is it?</text>
+      <text x="62" y="218">Let's think step by step.</text>
+    </g>
+    <path d="M350 164 H408" stroke="#bba67d" stroke-width="6" stroke-linecap="round" />
+    <path d="M394 148 L418 164 L394 180" fill="none" stroke="#bba67d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <rect x="434" y="78" width="232" height="174" rx="18" fill="#2b6a4a" opacity="0.1" />
+    <g fill="#171512" font-size="17" font-family="Manrope, sans-serif">
+      <text x="456" y="120">Start from 8.</text>
+      <text x="456" y="148">Add 3 hours.</text>
+      <text x="456" y="176">8 + 3 = 11.</text>
+      <text x="456" y="214">Answer: 11 o'clock.</text>
+    </g>
+  </svg>
+  <figcaption>プロンプトの末尾に一文足すだけで、モデルの出力に「途中の考え方」が現れるゼロショット CoT のイメージ図です。</figcaption>
+</figure>
+
+<p>
+  立ち止まって、この不思議さを味わってみてください。モデルのパラメータは変わっていません。追加学習もしていません。ただ「順を追って考えてみよう」と一言添えただけで、まるで別人のように賢くなる。
+</p>
+<p>
+  これが意味するのは、事前学習の過程でことばの使われ方を覚える中で、モデルはある種の推論能力の断片のようなものも一緒に獲得していた、ということです。でもそれは、正しく呼びかけないと出てこない、眠った能力でした。
+</p>
+<p>
+  いわば事前学習モデルには、見た目以上の潜在能力が隠れていたのです。そしてその力は、プロンプトという「呪文」で呼び覚ますことができた。これは裏を返せば、巧いプロンプトを書ける人だけがモデルの力を活かせるという状態でもあります。
+</p>
+<p>
+  万人が使う製品にするには、それでは足りません。ここから自然に、次の問いが浮かび上がります。プロンプトの工夫に頼るのではなく、<span class="text-highlight">モデル自身に「指示に従う力」を後付けで学ばせる</span>ことはできないのか。
+</p>
+
+<h3>2-6. 指示に従うよう後付けで学ばせる ── Instruction Tuning と ChatGPT 前夜</h3>
+<p>
+  sec-1 で見た GPT-3 は、確かに強力なモデルでした。でも、まだ決定的に足りないものがありました。ユーザーの言うことを、素直に聞いてくれないんです。
+</p>
+<p>
+  これは、言語モデルの本来の訓練目標を考えれば納得がいきます。GPT 系のモデルは「次の単語を予測する」ように学習されていて、「人に親切に答える」ように作られているわけではありません。
+  プロンプトが会話っぽければ会話らしく振る舞うことはありますが、それはネット上で見た会話文の模倣にすぎないのです。
+  <a class="ref" href="#src-s2-09" data-level="3">s2-09</a>
+  <a class="ref" href="#src-s2-10" data-level="3">s2-10</a>
+</p>
+<p>
+  このギャップを埋めるのが、Instruction Tuning です。「この指示にはこう答えるべきだ」という例を大量に見せて、指示に従う振る舞いを後付けで学ばせる手法です。
+</p>
+<p>
+  初期の代表例が、Google Research の FLAN です。FLAN は多数のタスクを「〜を要約せよ」「〜を翻訳せよ」といった自然言語の指示文として記述し、それに従わせるよう追加訓練しました。
+  すると、学習時に直接見ていない新しいタスクにも、ゼロショットでかなりうまく適応できたのです。大事なのは、FLAN が「プロンプトは大切だ」と言っただけではない点です。
+  指示に従う能力それ自体を、事後学習で育てられると大規模に示したことが本質でした。
+  <a class="ref" href="#src-s2-11" data-level="4">s2-11</a>
+</p>
+<p>
+  この流れを決定的にしたのが、2022年1月に OpenAI が発表した InstructGPT です。InstructGPT は Instruction Tuning に加えて、RLHF を組み合わせました。
+  ざっくり言えば、モデルに複数の回答を出させ、人間に「どちらがいいか」を選ばせて、その好みに沿うよう追加訓練する仕組みです。
+  <a class="ref" href="#src-s2-12" data-level="3">s2-12</a>
+  <a class="ref" href="#src-s2-13" data-level="3">s2-13</a>
+</p>
+<p>
+  InstructGPT の論文で特に象徴的だったのは、13億パラメータの InstructGPT が、1750億パラメータの素の GPT-3 よりも人間評価で好まれたことです。
+  <a class="ref" href="#src-s2-13" data-level="3">s2-13</a>
+</p>
+<p>
+  この結果は重要なメッセージを含んでいます。モデルの価値は、大きさだけでは決まらない。どのように振る舞わせるか、つまりアライメントが決定的に重要なのです。
+</p>
+<p>
+  InstructGPT は突然空から降ってきたものでもありませんでした。言語モデルへの人間フィードバック適用は、2019年から先行研究が積み重なっていたのです。
+  <a class="ref" href="#src-s2-14" data-level="3">s2-14</a>
+  <a class="ref" href="#src-s2-15" data-level="3">s2-15</a>
+</p>
+<p>
+  そしてもうひとつ重要な事実があります。OpenAI は後に ChatGPT を紹介した際、「ChatGPT は InstructGPT の sibling model だ」と説明しました。
+  つまり、ChatGPT の革新は 2022年11月に突然ゼロから生まれたものではないのです。
+  <a class="ref" href="#src-s2-16" data-level="3">s2-16</a>
+</p>
+
+<details class="column-box">
+  <summary>実際に instruct tuning の違いをブラウザ上で試す</summary>
+  <div class="column-body">
+    <p>
+      ここでは、同じ質問を <span class="term">非 instruct モデル</span> と <span class="term">instruct tuning 済みモデル</span> の両方に投げて、
+      指示追従性の差をその場で眺められます。前者は「文章の続きをそれらしく足す」方向に寄りやすく、後者は「依頼に答える」方向へ整えられています。
+    </p>
+
+    <div class="llm-demo" data-js-llm-demo>
+      <div class="llm-demo-warning">
+        <p>
+          このデモは <code>transformers.js</code> で、あなたのブラウザから Hugging Face 上の ONNX モデルを直接読み込み、あなたのマシンの CPU を使って動かします。
+          タブが重くなったり、ファンが回ったり、最悪ブラウザが固まることがあります。さらに、両方試すと通信量は合計でだいたい 1GB 強になります。
+          もちろん壊れても私は責任を取りません。
+        </p>
+        <label class="llm-demo-consent">
+          <input type="checkbox" name="js-inference-agree" data-demo-consent />
+          <span>重くなることと通信量の大きさを理解したうえで、有効化する</span>
+        </label>
+      </div>
+
+      <div class="llm-demo-controls">
+        <label class="llm-demo-label" for="scene-2-demo-prompt">共通の質問</label>
+        <textarea
+          id="scene-2-demo-prompt"
+          class="llm-demo-prompt"
+          data-demo-prompt
+          rows="4"
+        >東京駅から日帰りで行ける、静かで落ち着いた場所は</textarea>
+        <p class="fn">
+          注: 非 instruct 側は「質問に答える」より「それっぽい続き方をする」ほうへ流れやすいので、妙な出力になってもそれ自体が比較対象です。
+        </p>
+      </div>
+
+      <div class="llm-demo-actions">
+        <button class="inline-demo-button" type="button" data-run-both disabled>順番に両方で比べる</button>
+      </div>
+
+      <div class="llm-demo-grid">
+        <section class="llm-demo-model" data-demo-model="base">
+          <div class="llm-demo-model-head">
+            <div>
+              <p class="llm-demo-kicker">non-instruct</p>
+              <h4>rinna japanese gpt2 xsmall</h4>
+            </div>
+            <span class="llm-demo-chip">約150MB級</span>
+          </div>
+          <p class="llm-demo-model-copy">
+            <a href="https://huggingface.co/saldra/rinna-japanese-gpt2-xsmall-onnx">saldra/rinna-japanese-gpt2-xsmall-onnx</a>
+            を使います。かなり軽い代わりに、指示追従はまだ粗いです。
+          </p>
+          <button class="inline-demo-button" type="button" data-run-model="base" disabled>このモデルで実行する</button>
+          <p class="llm-demo-status" data-model-status>同意すると有効になります。</p>
+          <div class="llm-demo-progress" data-model-progress hidden>
+            <span class="llm-demo-progress-bar" data-model-progress-bar></span>
+          </div>
+          <pre class="llm-demo-output" data-model-output>まだ実行していません。</pre>
+        </section>
+
+        <section class="llm-demo-model" data-demo-model="instruct">
+          <div class="llm-demo-model-head">
+            <div>
+              <p class="llm-demo-kicker">instruct tuned</p>
+              <h4>sarashina2.2 0.5b instruct</h4>
+            </div>
+            <span class="llm-demo-chip">約1GB級</span>
+          </div>
+          <p class="llm-demo-model-copy">
+            <a href="https://huggingface.co/keisuke-miyako/sarashina2.2-0.5b-instruct-v0.1-onnx-int4">keisuke-miyako/sarashina2.2-0.5b-instruct-v0.1-onnx-int4</a>
+            を使います。重いですが、そのぶん「頼まれたことに答える」形へかなり寄っています。こちらは実質的に WebGPU 対応ブラウザ前提です。
+          </p>
+          <button class="inline-demo-button" type="button" data-run-model="instruct" disabled>このモデルで実行する</button>
+          <p class="llm-demo-status" data-model-status>同意すると有効になります。</p>
+          <div class="llm-demo-progress" data-model-progress hidden>
+            <span class="llm-demo-progress-bar" data-model-progress-bar></span>
+          </div>
+          <pre class="llm-demo-output" data-model-output>まだ実行していません。</pre>
+        </section>
+      </div>
+    </div>
+  </div>
+</details>
+
+<details class="column-box">
+  <summary>コラム: Alignment と RLHF ── モデルはなぜ「従う」ようになるのか</summary>
+  <div class="column-body">
+    <p>
+      Alignment とは、AI の振る舞いを人間が望む方向へ合わせることです。単に能力を上げるのではなく、その能力をどう使うかを整える作業だと言ってもよいでしょう。
+    </p>
+    <p>
+      RLHF は、その整合を行うための代表的手法でした。AI に同じ質問への回答を何パターンか出させ、人間が「この中ならどれが一番よいか」を選び、その傾向を学んで「人間に好まれそうな答え」を点数化する採点係を作ります。
+      最後に、AI がその採点で高得点を取るように追加訓練します。
+      <a class="ref" href="#src-s2-13" data-level="3">s2-13</a>
+      <a class="ref" href="#src-s2-14" data-level="3">s2-14</a>
+      <a class="ref" href="#src-s2-15" data-level="3">s2-15</a>
+    </p>
+    <p>
+      重要なのは、RLHF が「真実そのもの」を直接教えるわけではないことです。教えているのは、人間が好む応答の傾向です。だから RLHF には強みも弱みもあります。
+    </p>
+    <p>
+      また、RLHF が唯一の方法というわけでもありません。後年には DPO や GRPO のような、人間の好みを訓練信号へ変換する別の手法も提案されています。
+      <a class="ref" href="#src-s2-17" data-level="3">s2-17</a>
+      <a class="ref" href="#src-s2-18" data-level="3">s2-18</a>
+    </p>
+  </div>
+</details>
+
+<h3>2-7. この時期の経済的風景 ── 「補助ツール」として価値が立ち上がる</h3>
+<p>
+  この時代の経済的風景を象徴する製品がひとつあります。GitHub Copilot です。
+</p>
+<p>
+  Copilot は GitHub が 2021年6月にテクニカルプレビューとして公開し、2022年6月に一般提供を開始した AI 駆動のコーディング支援ツールです。ユーザーが書いているコードの文脈を読み、
+  次の行や関数全体を提案してくれます。中核技術は OpenAI の Codex で、これは GPT-3 系をコード向けに強化したモデルでした。
+  <a class="ref" href="#src-s2-21" data-level="3">s2-21</a>
+  <a class="ref" href="#src-s2-22" data-level="3">s2-22</a>
+  <a class="ref" href="#src-s2-23" data-level="3">s2-23</a>
+</p>
+<p class="fn">注: ここでいう Codex は、2021年当時のコード生成モデル名です。現在の製品ブランドとは別系統です。</p>
+<p>
+  ここで初めて、LLM はかなり直接的に「知的労働を補助する製品」になりました。プログラマーが IDE の中でコードを書いている最中に、AI が次の一歩を提案してくれる。
+  2022年6月の一般提供時点で、GitHub はすでに過去12か月で 120万人超の開発者がテクニカルプレビューに参加したと述べています。
+  <a class="ref" href="#src-s2-24" data-level="3">s2-24</a>
+</p>
+<p class="fn">注: IDE は、コード編集や実行、補完、デバッグなどをまとめて行うための統合開発環境です。</p>
+<p>
+  そして 2022年9月には、まったく別の方向から LLM の価値を証明するサービスが現れます。Character.AI です。
+</p>
+<p>
+  Character.AI は、ユーザーが自分で AI キャラクターを作り、そのキャラクターと自由に会話できるサービスでした。目的は雑談、ロールプレイ、創作の相手探し。つまり、AI としゃべること自体が娯楽になる、という市場が立ち上がっていたのです。
+  <a class="ref" href="#src-s2-27" data-level="3">s2-27</a>
+</p>
+<p>
+  その吸引力はかなりのものでした。公式ブログによれば、ベータ開始から二か月で一日10億語が生成され、35万を超えるキャラクターが作られたそうです。2023年初頭の Similarweb 推計では、訪問あたり滞在時間は 25〜30分近くに達していました。
+  <a class="ref" href="#src-s2-27" data-level="3">s2-27</a>
+  <a class="ref" href="#src-s2-28" data-level="2">s2-28</a>
+</p>
+<p>
+  GitHub Copilot が「LLM で仕事が速くなる」を証明したとすれば、Character.AI は「LLM で人が夢中になる」を証明した。この二つの方向性は、のちの ChatGPT 以降の世界でも並走し続けることになります。
+</p>
+
+<div class="bottleneck-block">
+  <p>
+    <strong>この時期のボトルネック:</strong> API によってアクセスは改善されましたが、モデルはまだ不安定で、複雑な推論も苦手で、使いこなすにはプロンプトの工夫が必要でした。それでも、文章作成、コード補完、キャラクターチャットのような領域では、もう十分に価値がありました。
+  </p>
+</div>
+<p>
+  そして次の一手は、技術的には意外なほど単純でした。モデルを、誰でもブラウザから話しかけられる形で出すこと。2022年11月30日、ChatGPT がそれをやります。
 </p>

@@ -1,5 +1,7 @@
 /* ==========================================================================
    chart.js — Sticky compute chart for LLM history
+   Growing single-graph animation: points are added progressively and
+   existing points smoothly reposition as the axes zoom out.
    ========================================================================== */
 (function () {
   "use strict";
@@ -56,6 +58,10 @@
     return d;
   }
 
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+  /* ---- DOM refs ---- */
   var sticky = document.getElementById("sticky-briefing");
   var panelAnim = document.getElementById("panel-anim");
   var svg = document.getElementById("history-chart");
@@ -70,100 +76,98 @@
     return;
   }
 
+  var CHART_POINTS = [
+    { label: "2018", compute: 4.41e21 },
+    { label: "2020", compute: 2.13e23 },
+    { label: "2022", compute: 2.66e24 },
+    { label: "2024", compute: 4.40e25 },
+    { label: "2026", compute: 4.40e26 }
+  ];
+
   var SCENES = {
     "scene-1": {
       month: "Jan",
       year: "2018",
       chart: {
-        startLabel: "2018",
-        endLabel: "2020",
-        series: [
-          { color: "#2b6a4a", width: 2.5, values: [18, 20, 24, 28, 34, 41] }
-        ]
+        pointCount: 2,
+        color: "#2b6a4a",
+        width: 2.5
       },
       benchmarks: [
-        { lane: "Pretrain", label: "LAMBADA 72.5%", level: "active", detail: "Long-context word prediction benchmark. Early signal that autoregressive pretraining transferred broadly.", replacement: "MMLU" },
-        { lane: "Scaling", label: "Commonsense 63.8%", level: "mid", detail: "Placeholder umbrella for early commonsense benchmarks used to see scaling effects.", replacement: "PIQA" },
-        { lane: "API", label: "N/A", level: "off", detail: "", replacement: "" },
-        { lane: "Chat", label: "Humanness 2.6/5", level: "off", detail: "Early human-likeness judging before chat-native public rankings existed.", replacement: "Arena" },
-        { lane: "Reason", label: "PIQA 68.3%", level: "off", detail: "Physical commonsense QA used as a proxy before dedicated reasoning evals took over.", replacement: "GSM8K" },
-        { lane: "Agents", label: "N/A", level: "off", detail: "", replacement: "SWE-bench" }
+        { lane: "Pretrain", label: "GLUE", level: "active", detail: "NLPの総合テスト。2018年ごろの『何でもできる土台』を示した代表格。", replacement: "SuperGLUE" },
+        { lane: "Scaling", label: "SQuAD v1.1", level: "mid", detail: "文章を読んで答える読解+Q&Aベンチ。", replacement: "MMLU" },
+        { lane: "API", label: "N/A", level: "off", detail: "まだAPI時代の前。研究ベンチが中心だった。", replacement: "HumanEval" },
+        { lane: "Chat", label: "N/A", level: "off", detail: "まだ『会話AIの人気順位表』のような物差しは定着していない。", replacement: "Meena SSA" },
+        { lane: "Reason", label: "MultiNLI", level: "mid", detail: "二つの文の意味関係を当てる。初期の推論系ベンチ。", replacement: "GSM8K" },
+        { lane: "Agents", label: "N/A", level: "off", detail: "エージェント評価はまだほぼ存在しない。", replacement: "WebArena" }
       ]
     },
     "scene-2": {
       month: "Jun",
       year: "2020",
       chart: {
-        startLabel: "2020",
-        endLabel: "2022",
-        series: [
-          { color: "#2b6a4a", width: 2.5, values: [36, 41, 48, 56, 60, 66] }
-        ]
+        pointCount: 3,
+        color: "#2b6a4a",
+        width: 2.5
       },
       benchmarks: [
-        { lane: "Pretrain", label: "LAMBADA 86.4%", level: "active", detail: "By this point LAMBADA was nearing saturation and pushing people toward broader knowledge evals.", replacement: "MMLU" },
-        { lane: "Scaling", label: "PIQA 82.3%", level: "active", detail: "A cleaner physical commonsense benchmark for the scaling era.", replacement: "HellaSwag / GPQA" },
-        { lane: "API", label: "SSI 67/100", level: "active", detail: "Placeholder API-era instruction-following and stability eval.", replacement: "MT-Bench" },
-        { lane: "Chat", label: "Engaging 3.7/5", level: "mid", detail: "Human-judged engagingness before chat UI became the public face of LLMs.", replacement: "Arena" },
-        { lane: "Reason", label: "Grounded 71%", level: "off", detail: "Groundedness/safety style evals that mattered for early deployment.", replacement: "GSM8K / GPQA" },
-        { lane: "Agents", label: "Sandbox 23%", level: "off", detail: "Placeholder sandbox tool-usage score for pre-agent product experiments.", replacement: "WebArena / SWE-bench" }
+        { lane: "Pretrain", label: "LAMBADA", level: "active", detail: "長い文脈の次語予測。GPT-3時代の伸びを見せた定番。", replacement: "MMLU" },
+        { lane: "Scaling", label: "SuperGLUE", level: "active", detail: "GLUEの次に来た、より難しい総合試験。", replacement: "MMLU-Pro" },
+        { lane: "API", label: "HumanEval", level: "active", detail: "コード生成をテストするベンチ。CodexやCopilot時代の象徴。", replacement: "SWE-bench Verified" },
+        { lane: "Chat", label: "Meena SSA", level: "mid", detail: "会話がどれだけ自然かを見る初期のチャット評価。", replacement: "Chatbot Arena" },
+        { lane: "Reason", label: "GSM8K", level: "mid", detail: "小学校レベルの文章題。reasoningの代表ベンチになった。", replacement: "AIME 2024" },
+        { lane: "Agents", label: "N/A", level: "off", detail: "複数ステップの自律行動を測る時代はまだ先。", replacement: "WebArena" }
       ]
     },
     "scene-3": {
       month: "Nov",
       year: "2022",
       chart: {
-        startLabel: "2022",
-        endLabel: "2024",
-        series: [
-          { color: "#2b6a4a", width: 2.5, values: [48, 52, 58, 66, 74, 78] }
-        ]
+        pointCount: 4,
+        color: "#2b6a4a",
+        width: 2.5
       },
       benchmarks: [
-        { lane: "Pretrain", label: "MMLU 86.4%", level: "mid", detail: "Broad knowledge exam that became the public shorthand for frontier capability.", replacement: "MMLU-Pro" },
-        { lane: "Scaling", label: "HellaSwag 95.3%", level: "active", detail: "A high-scoring commonsense benchmark showing how older evals were saturating.", replacement: "GPQA" },
-        { lane: "API", label: "MT-Bench 8.6", level: "active", detail: "Multi-turn assistant eval used heavily in the post-ChatGPT comparison loop.", replacement: "ToolBench" },
-        { lane: "Chat", label: "Arena 1248", level: "active", detail: "Chatbot Arena Elo. Public-facing ranking that made model competition legible.", replacement: "Arena-Hard" },
-        { lane: "Reason", label: "GSM8K 92.0%", level: "mid", detail: "Math word problems. Standard reasoning yardstick before harder math/science evals took over.", replacement: "AIME 2024" },
-        { lane: "Agents", label: "SWE-lite 18.4%", level: "off", detail: "Early software-task eval showing the move from abstract answers to real task completion.", replacement: "SWE-Verified" }
+        { lane: "Pretrain", label: "MMLU", level: "active", detail: "幅広い科目をまとめて測る総合試験。GPT-4以後の代表指標。", replacement: "MMLU-Pro" },
+        { lane: "Scaling", label: "HellaSwag", level: "mid", detail: "常識的な続きを選ぶベンチ。旧世代ベンチの飽和も見えた。", replacement: "GPQA Diamond" },
+        { lane: "API", label: "MT-Bench", level: "active", detail: "多ターン会話での受け答えを見る。Chat API時代の比較軸。", replacement: "Arena-Hard" },
+        { lane: "Chat", label: "Chatbot Arena", level: "active", detail: "人間の投票で会話モデルを順位付けする有名ベンチ。", replacement: "Arena-Hard" },
+        { lane: "Reason", label: "GSM8K", level: "active", detail: "算数文章題。『考えて答える』力の見取り図になった。", replacement: "AIME 2024" },
+        { lane: "Agents", label: "WebArena", level: "mid", detail: "ウェブ操作を最後までやり切れるかを見る初期のエージェント評価。", replacement: "BrowseComp" }
       ]
     },
     "scene-4": {
       month: "Sep",
       year: "2024",
       chart: {
-        startLabel: "2024",
-        endLabel: "2025",
-        series: [
-          { color: "#2b6a4a", width: 2.5, values: [68, 72, 79, 84, 88, 93] }
-        ]
+        pointCount: 5,
+        color: "#2b6a4a",
+        width: 2.5
       },
       benchmarks: [
-        { lane: "Pretrain", label: "MMLU-Pro 78%", level: "mid", detail: "Harder successor to MMLU once the original version became too easy.", replacement: "HLE-like" },
-        { lane: "Scaling", label: "GPQA 65%", level: "active", detail: "Hard science QA used to separate frontier models after many older evals saturated.", replacement: "FrontierOps" },
-        { lane: "API", label: "ToolBench 74%", level: "active", detail: "Tool-use oriented assistant eval reflecting the shift from pure chat to action.", replacement: "Agentic Tool Use" },
-        { lane: "Chat", label: "Arena-Hard 89%", level: "active", detail: "Harder variant of Arena-style comparison prompts.", replacement: "SessionBench" },
-        { lane: "Reason", label: "AIME 83%", level: "active", detail: "Competition math became the clearest public signal of reasoner performance.", replacement: "HLE-like" },
-        { lane: "Agents", label: "SWE-Verified 49%", level: "mid", detail: "Verified software-task evaluation for agentic coding performance.", replacement: "RE-Bench" }
+        { lane: "Pretrain", label: "MMLU-Pro", level: "mid", detail: "MMLUが簡単になり始めたので作られた後継ベンチ。", replacement: "LiveBench" },
+        { lane: "Scaling", label: "GPQA Diamond", level: "active", detail: "博士レベル理系の難問。知識より深い推論が問われる。", replacement: "HLE" },
+        { lane: "API", label: "ToolBench", level: "active", detail: "外部ツールを正しく選んで使えるかを見る。", replacement: "Terminal-Bench" },
+        { lane: "Chat", label: "Arena-Hard", level: "active", detail: "上位モデルの差を見分けやすい、より厳しい会話評価。", replacement: "Chatbot Arena" },
+        { lane: "Reason", label: "AIME 2024", level: "active", detail: "数学オリンピック予選級の問題。reasoning modelの伸びが出やすい。", replacement: "FrontierMath" },
+        { lane: "Agents", label: "SWE-bench Verified", level: "active", detail: "実在GitHub issueを直せるかを見る、定番のコーディング評価。", replacement: "Terminal-Bench" }
       ]
     },
     "scene-5": {
       month: "Jan",
       year: "2026",
       chart: {
-        startLabel: "2026",
-        endLabel: "future",
-        series: [
-          { color: "#2b6a4a", width: 2.5, values: [78, 84, 88, 92, 95, 98] }
-        ]
+        pointCount: 5,
+        color: "#2b6a4a",
+        width: 2.5
       },
       benchmarks: [
-        { lane: "Pretrain", label: "BullshitBench v2 91.0%", level: "mid", detail: "", replacement: "ongoing" },
-        { lane: "Scaling", label: "FrontierOps 91%", level: "active", detail: "", replacement: "ongoing" },
-        { lane: "API", label: "Terminal-Bench 2.0 82.9%", level: "active", detail: ".", replacement: "ongoing" },
-        { lane: "Chat", label: "SessionBench 4.7/5", level: "mid", detail: "", replacement: "ongoing" },
-        { lane: "Reason", label: "HLE 26%", level: "active", detail: "", replacement: "ongoing" },
-        { lane: "Agents", label: "RE-Bench 62%", level: "active", detail: "", replacement: "ongoing" }
+        { lane: "Pretrain", label: "LiveBench", level: "mid", detail: "問題を継続更新して、ベンチ汚染を避けようとする新世代の総合評価。", replacement: "ongoing" },
+        { lane: "Scaling", label: "HLE", level: "active", detail: "Humanity's Last Exam。古い総合試験の天井を越えるための超難問。", replacement: "ongoing" },
+        { lane: "API", label: "BrowseComp", level: "mid", detail: "ウェブを粘り強く調べて答えを見つけられるかを見る。", replacement: "ongoing" },
+        { lane: "Chat", label: "Chatbot Arena", level: "mid", detail: "今も『会話としてどちらが良いか』を見る代表的な人気指標。", replacement: "ongoing" },
+        { lane: "Reason", label: "FrontierMath", level: "active", detail: "未公開の難問数学。上位モデルでもまだかなり難しい。", replacement: "ongoing" },
+        { lane: "Agents", label: "Terminal-Bench", level: "active", detail: "ターミナルで長い作業をやり切れるかを見る、エージェント時代の重要ベンチ。", replacement: "ongoing" }
       ]
     }
   };
@@ -276,111 +280,294 @@
     });
   }
 
-  function renderChart(chartData) {
+  /* ====================================================================
+     Persistent chart — smooth grow / zoom-out animation
+     ==================================================================== */
+  var W = 430;
+  var H = 152;
+  var PAD = { top: 12, right: 18, bottom: 22, left: 34 };
+  var BASE = H - PAD.bottom;
+  var usableW = W - PAD.right - PAD.left;
+  var usableH = BASE - PAD.top;
+  var ANIM_MS = 650;
+
+  var crt = {
+    ready: false,
+    count: 0,
+    positions: [],
+    livePositions: [],
+    liveCount: 0,
+    dMin: 0,
+    dMax: 0,
+    animId: null,
+    el: {}
+  };
+
+  function computeLayout(n) {
+    var pts = CHART_POINTS.slice(0, n);
+    var logs = pts.map(function (p) { return Math.log(p.compute) / Math.LN10; });
+    var lo = Math.min.apply(null, logs);
+    var hi = Math.max.apply(null, logs);
+    var span = hi - lo;
+    var yPad = span > 0 ? span * 0.16 : 0.7;
+    var dMin = lo - yPad;
+    var dMax = hi + yPad;
+    var dRange = dMax - dMin || 1;
+    var lIn = n === 1 ? 0.5 : 0.03;
+    var rIn = n === 1 ? 0.5 : 0.97;
+
+    return {
+      positions: pts.map(function (p, i) {
+        var xR = n === 1 ? 0.5 : lIn + (rIn - lIn) * (i / (n - 1));
+        var logV = Math.log(p.compute) / Math.LN10;
+        var yR = (logV - dMin) / dRange;
+        return { x: PAD.left + usableW * xR, y: BASE - usableH * yR };
+      }),
+      dMin: dMin,
+      dMax: dMax,
+      dRange: dRange
+    };
+  }
+
+  function buildTicks(dMin, dMax) {
+    var ticks = [];
+    var tMin = Math.ceil(dMin);
+    var tMax = Math.floor(dMax);
+    var step = Math.max(1, Math.ceil((tMax - tMin + 1) / 3));
+    for (var e = tMin; e <= tMax; e += step) { ticks.push(e); }
+    if (!ticks.length || ticks[ticks.length - 1] !== tMax) { ticks.push(tMax); }
+    return ticks;
+  }
+
+  function initChartSvg() {
     clearNode(svg);
 
-    var W = 430;
-    var H = 152;
-    var PAD = { top: 12, right: 18, bottom: 22, left: 0 };
-    var BASE = H - PAD.bottom;
-    var usableWidth = W - PAD.right - PAD.left;
-    var usableHeight = BASE - PAD.top;
+    svg.appendChild(svgEl("title", { id: "chart-title-svg" })).textContent =
+      "Scroll-synced frontier training compute chart";
+    svg.appendChild(svgEl("desc", { id: "chart-desc-svg" })).textContent =
+      "Each point is the mean Training compute of the top two models available by that date, derived from the CC-BY EPOCH AI model index.";
 
-    var defs = svgEl("defs");
-    var clipPath = svgEl("clipPath", { id: "chart-reveal-clip" });
-    var clipRect = svgEl("rect", {
-      x: "0",
-      y: "0",
-      width: "0",
-      height: String(H)
-    });
-    clipPath.appendChild(clipRect);
-    defs.appendChild(clipPath);
-    svg.appendChild(defs);
+    crt.el.gridGroup = svgEl("g");
+    svg.appendChild(crt.el.gridGroup);
 
-    [0.25, 0.5, 0.75].forEach(function (ratio) {
-      var y = PAD.top + usableHeight * ratio;
-      svg.appendChild(svgEl("line", {
-        x1: PAD.left,
-        y1: y,
-        x2: W - PAD.right,
-        y2: y,
-        stroke: "rgba(17,17,17,0.08)",
-        "stroke-width": "1"
-      }));
+    crt.el.axisLabel = svgEl("text", {
+      x: "4", y: String(PAD.top + 2),
+      fill: "rgba(116,110,99,0.38)",
+      "font-family": "'IBM Plex Mono', monospace",
+      "font-size": "7",
+      "letter-spacing": "0.08em"
     });
+    crt.el.axisLabel.textContent = "FLOP";
+    svg.appendChild(crt.el.axisLabel);
 
     for (var i = 1; i <= 4; i += 1) {
-      var x = PAD.left + usableWidth * (i / 5);
+      var x = PAD.left + usableW * (i / 5);
       svg.appendChild(svgEl("line", {
-        x1: x,
-        y1: PAD.top + 4,
-        x2: x,
-        y2: BASE,
-        stroke: "rgba(17,17,17,0.05)",
-        "stroke-width": "1"
+        x1: x, y1: PAD.top + 4, x2: x, y2: BASE,
+        stroke: "rgba(17,17,17,0.05)", "stroke-width": "1"
       }));
     }
 
-    var contentGroup = svgEl("g", { "clip-path": "url(#chart-reveal-clip)" });
-    svg.appendChild(contentGroup);
+    crt.el.content = svgEl("g");
+    svg.appendChild(crt.el.content);
 
-    chartData.series.forEach(function (series) {
-      var points = series.values.map(function (value, index) {
-        return {
-          x: PAD.left + usableWidth * (index / (series.values.length - 1)),
-          y: BASE - usableHeight * (value / 100)
-        };
-      });
-
-      var path = svgEl("path", {
-        d: linePath(points),
-        fill: "none",
-        stroke: series.color,
-        "stroke-width": String(series.width),
-        "stroke-linecap": "round",
-        "stroke-linejoin": "round",
-        "stroke-opacity": "0.9"
-      });
-      contentGroup.appendChild(path);
-
-      var last = points[points.length - 1];
-      contentGroup.appendChild(svgEl("circle", {
-        cx: String(last.x),
-        cy: String(last.y),
-        r: "3.5",
-        fill: "#f7f1e5",
-        stroke: series.color,
-        "stroke-width": "1.8"
-      }));
+    crt.el.path = svgEl("path", {
+      fill: "none",
+      stroke: "#2b6a4a",
+      "stroke-width": "2.5",
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+      "stroke-opacity": "0.9",
+      d: ""
     });
+    crt.el.content.appendChild(crt.el.path);
 
-    var startLabel = svgEl("text", {
-      x: String(PAD.left),
-      y: String(H - 4),
+    crt.el.dots = [];
+    for (var j = 0; j < CHART_POINTS.length; j += 1) {
+      var dot = svgEl("circle", {
+        cx: "0", cy: "0", r: "2.4",
+        fill: "#2b6a4a", stroke: "#2b6a4a",
+        "stroke-width": "1.2", "fill-opacity": "0.78",
+        opacity: "0"
+      });
+      crt.el.content.appendChild(dot);
+      crt.el.dots.push(dot);
+    }
+
+    crt.el.startLabel = svgEl("text", {
+      x: String(PAD.left), y: String(H - 4),
       fill: "#746e63",
       "font-family": "'IBM Plex Mono', monospace",
       "font-size": "10"
     });
-    startLabel.textContent = chartData.startLabel;
-    svg.appendChild(startLabel);
+    svg.appendChild(crt.el.startLabel);
 
-    var endLabel = svgEl("text", {
-      x: String(W - PAD.right),
-      y: String(H - 4),
+    crt.el.endLabel = svgEl("text", {
+      x: String(W - PAD.right), y: String(H - 4),
       fill: "#746e63",
       "font-family": "'IBM Plex Mono', monospace",
       "font-size": "10",
       "text-anchor": "end"
     });
-    endLabel.textContent = chartData.endLabel;
-    svg.appendChild(endLabel);
+    svg.appendChild(crt.el.endLabel);
 
-    requestAnimationFrame(function () {
-      clipRect.style.transition = "width 640ms cubic-bezier(0.2, 0.9, 0.2, 1)";
-      clipRect.setAttribute("width", String(W - PAD.right + 8));
+    crt.ready = true;
+  }
+
+  function drawGrid(dMin, dMax, dRange) {
+    clearNode(crt.el.gridGroup);
+    var ticks = buildTicks(dMin, dMax);
+    ticks.forEach(function (exp) {
+      var y = BASE - usableH * ((exp - dMin) / dRange);
+      crt.el.gridGroup.appendChild(svgEl("line", {
+        x1: PAD.left, y1: y, x2: W - PAD.right, y2: y,
+        stroke: "rgba(17,17,17,0.06)", "stroke-width": "1"
+      }));
+      var lbl = svgEl("text", {
+        x: String(PAD.left - 6), y: String(y + 3),
+        fill: "rgba(116,110,99,0.48)",
+        "font-family": "'IBM Plex Mono', monospace",
+        "font-size": "8", "text-anchor": "end"
+      });
+      lbl.textContent = "1e" + exp;
+      crt.el.gridGroup.appendChild(lbl);
     });
   }
+
+  function paintDots(positions, targetN, color, opacities) {
+    for (var i = 0; i < crt.el.dots.length; i += 1) {
+      var dot = crt.el.dots[i];
+      var op = opacities ? opacities[i] : (i < targetN ? 1 : 0);
+      if (i < positions.length && op > 0.001) {
+        var isLast = (i === targetN - 1);
+        dot.setAttribute("cx", positions[i].x);
+        dot.setAttribute("cy", positions[i].y);
+        dot.setAttribute("r", isLast ? "3.5" : "2.4");
+        dot.setAttribute("fill", isLast ? "#f7f1e5" : color);
+        dot.setAttribute("stroke", color);
+        dot.setAttribute("stroke-width", isLast ? "1.8" : "1.2");
+        dot.setAttribute("fill-opacity", isLast ? "1" : "0.78");
+        dot.setAttribute("opacity", String(op));
+      } else {
+        dot.setAttribute("opacity", "0");
+      }
+    }
+  }
+
+  function renderChart(chartData) {
+    if (!crt.ready) initChartSvg();
+
+    var targetN = chartData.pointCount;
+    var color = chartData.color;
+    var target = computeLayout(targetN);
+
+    /* — First render: instant, no animation — */
+    if (crt.count === 0) {
+      crt.positions = target.positions;
+      crt.livePositions = target.positions;
+      crt.liveCount = targetN;
+      crt.dMin = target.dMin;
+      crt.dMax = target.dMax;
+      crt.count = targetN;
+      drawGrid(target.dMin, target.dMax, target.dRange);
+      if (target.positions.length > 1) {
+        crt.el.path.setAttribute("d", linePath(target.positions));
+      }
+      paintDots(target.positions, targetN, color, null);
+      crt.el.startLabel.textContent = CHART_POINTS[0].label;
+      crt.el.endLabel.textContent = CHART_POINTS[targetN - 1].label;
+      return;
+    }
+
+    /* — Same point count: nothing to animate — */
+    if (targetN === crt.count) return;
+
+    /* — Cancel any running animation — */
+    if (crt.animId) { cancelAnimationFrame(crt.animId); crt.animId = null; }
+
+    /* — Build from-positions (use live mid-animation positions if any) — */
+    var fromPos = crt.livePositions.slice();
+    var fromN = crt.liveCount;
+    var maxN = Math.max(fromN, targetN);
+
+    while (fromPos.length < maxN) {
+      var last = fromPos[fromPos.length - 1];
+      fromPos.push({ x: last.x, y: last.y });
+    }
+
+    var targetPad = target.positions.slice();
+    while (targetPad.length < maxN) {
+      var tLast = targetPad[targetPad.length - 1];
+      targetPad.push({ x: tLast.x, y: tLast.y });
+    }
+
+    /* Update labels & grid immediately */
+    crt.el.startLabel.textContent = CHART_POINTS[0].label;
+    crt.el.endLabel.textContent = CHART_POINTS[targetN - 1].label;
+    drawGrid(target.dMin, target.dMax, target.dRange);
+
+    var startTime = null;
+
+    function frame(ts) {
+      if (!startTime) startTime = ts;
+      var raw = Math.min((ts - startTime) / ANIM_MS, 1);
+      var t = easeOutCubic(raw);
+
+      var interp = [];
+      var ops = [];
+
+      for (var i = 0; i < maxN; i += 1) {
+        interp.push({
+          x: lerp(fromPos[i].x, targetPad[i].x, t),
+          y: lerp(fromPos[i].y, targetPad[i].y, t)
+        });
+
+        if (i < Math.min(fromN, targetN)) {
+          ops.push(1);
+        } else if (i >= fromN && i < targetN) {
+          ops.push(Math.min(1, t * 2));
+        } else if (i >= targetN && i < fromN) {
+          ops.push(Math.max(0, 1 - t * 2));
+        } else {
+          ops.push(0);
+        }
+      }
+
+      /* Path through all points that have any visibility */
+      var pathPts = [];
+      for (var k = 0; k < maxN; k += 1) {
+        if (ops[k] > 0.001) pathPts.push(interp[k]);
+      }
+      if (pathPts.length > 1) {
+        crt.el.path.setAttribute("d", linePath(pathPts));
+        crt.el.path.style.opacity = "1";
+      } else {
+        crt.el.path.style.opacity = "0";
+      }
+
+      paintDots(interp, targetN, color, ops);
+
+      /* Keep live state for mid-animation interrupts */
+      crt.livePositions = interp;
+      crt.liveCount = targetN;
+
+      if (raw < 1) {
+        crt.animId = requestAnimationFrame(frame);
+      } else {
+        crt.positions = target.positions;
+        crt.livePositions = target.positions;
+        crt.liveCount = targetN;
+        crt.dMin = target.dMin;
+        crt.dMax = target.dMax;
+        crt.count = targetN;
+        crt.animId = null;
+      }
+    }
+
+    crt.animId = requestAnimationFrame(frame);
+  }
+
+  /* ---- Scene rendering (chart animates; benchmarks swap instantly) ---- */
 
   function renderScene(sceneId, animate) {
     var scene = SCENES[sceneId];
@@ -399,14 +586,10 @@
 
     if (switchTimer) {
       window.clearTimeout(switchTimer);
+      switchTimer = null;
     }
 
-    sticky.classList.add("is-switching");
-    switchTimer = window.setTimeout(function () {
-      renderScene(sceneId, true);
-      sticky.classList.remove("is-switching");
-      switchTimer = null;
-    }, 120);
+    renderScene(sceneId, true);
   }
 
   function updateActiveScene() {
@@ -442,6 +625,9 @@
   renderScene(activeSceneId, false);
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", function () {
+    /* SVG viewBox handles scaling; only re-sync active scene */
+    crt.count = 0;
+    crt.ready = false;
     renderScene(activeSceneId, false);
     onScroll();
   });
